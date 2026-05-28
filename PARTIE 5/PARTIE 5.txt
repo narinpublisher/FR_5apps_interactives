@@ -1,0 +1,425 @@
+🎯 JavaScript par la pratique
+Maîtrisez les bases et créez 5 applications interactives
+
+🚀  PARTIE 5  —  App 4 : Application de révision par flashcards
+(BAC & concours)
+
+
+
+✅ 6.1 — Concepts de gestion d'état : qu'est-ce que l'état ? Suivre la progression sans framework
+
+
+👉 État versus interface
+---------------------------
+// ❌ Mauvaise approche — lire l'état depuis le DOM
+function estCarteCote_Question() {
+  return document.querySelector('#carte').classList.contains('recto');
+}
+
+// ✅ Bonne approche — l'état vit dans des variables JavaScript
+let estRetournee = false;  // false = question visible, true = réponse visible
+
+function retournerCarte() {
+  estRetournee = !estRetournee;  // Modifier l'état
+  mettreAJourInterface();         // Régénérer l'UI depuis l'état
+}
+---------------------------
+
+👉 La structure d'état de notre application
+---------------------------
+// L'objet d'état central de l'application
+const etat = {
+  cartes           : [],      // Tableau des flashcards (mélangé)
+  indexCourant     : 0,       // Index de la carte actuellement affichée
+  estRetournee     : false,   // false = question, true = réponse
+  bonnesReponses   : 0,       // Compteur de réponses correctes
+  mauvaisesReponses: 0,       // Compteur de réponses incorrectes
+  sessionTerminee  : false,   // true quand toutes les cartes ont été vues
+};
+
+// Pour consulter l'état à tout moment dans la console du navigateur :
+// console.log(etat);   — affiche tout l'état en un seul objet lisible
+---------------------------
+
+
+👉 La structure d'état de notre application
+---------------------------
+// L'objet d'état central de l'application
+const etat = {
+  cartes           : [],      // Tableau des flashcards (mélangé)
+  indexCourant     : 0,       // Index de la carte actuellement affichée
+  estRetournee     : false,   // false = question, true = réponse
+  bonnesReponses   : 0,       // Compteur de réponses correctes
+  mauvaisesReponses: 0,       // Compteur de réponses incorrectes
+  sessionTerminee  : false,   // true quand toutes les cartes ont été vues
+};
+
+// Pour consulter l'état à tout moment dans la console du navigateur :
+// console.log(etat);   — affiche tout l'état en un seul objet lisible
+---------------------------
+
+
+👉 Fonctions de mise à jour de l'état
+---------------------------
+// Patron de modification d'état : toujours modifier, puis rendre
+
+function passerCarteSuivante() {
+  if (etat.sessionTerminee) return;
+
+  etat.indexCourant++;
+  etat.estRetournee = false;   // Revenir à la face question
+
+  if (etat.indexCourant >= etat.cartes.length) {
+    etat.sessionTerminee = true;
+    afficherEcranResultats();
+  } else {
+    afficherCarteCourante();
+  }
+}
+
+function enregistrerBonneReponse() {
+  etat.bonnesReponses++;
+  passerCarteSuivante();
+}
+
+function enregistrerMauvaiseReponse() {
+  etat.mauvaisesReponses++;
+  passerCarteSuivante();
+}
+---------------------------
+
+
+
+✅ 6.2 — Structure de données des questions : tableau d'objets, algorithme de mélange (Fisher-Yates)
+
+
+👉 Modéliser une flashcard : l'objet carte
+---------------------------
+const BANQUE_CARTES = [
+  {
+    id: 1, categorie: "Mathématiques", niveau: "terminale",
+    question  : "Quelle est la dérivée de ln(x) ?",
+    reponse   : "1/x (pour x > 0)",
+    explication: "La dérivée de ln(x) est 1/x. Pour ln(f(x)), elle vaut f'(x)/f(x).",
+  },
+  {
+    id: 2, categorie: "Mathématiques", niveau: "terminale",
+    question  : "Que vaut e⁰ ?",
+    reponse   : "1",
+    explication: "Pour tout réel a, a⁰ = 1 (convention universelle, a ≠ 0).",
+  },
+  {
+    id: 3, categorie: "Physique", niveau: "terminale",
+    question  : "Quelle est la formule de l'énergie cinétique ?",
+    reponse   : "Ec = ½mv²",
+    explication: "m = masse en kg, v = vitesse en m/s. Résultat en Joules (J).",
+  },
+  {
+    id: 4, categorie: "Histoire", niveau: "première",
+    question  : "En quelle année a eu lieu la Révolution française ?",
+    reponse   : "1789",
+    explication: "La Révolution française débute le 14 juillet 1789 avec la prise de la Bastille.",
+  },
+  {
+    id: 5, categorie: "Philosophie", niveau: "terminale",
+    question  : "Qui a écrit le Discours de la méthode (1637) ?",
+    reponse   : "René Descartes",
+    explication: "Descartes y énonce le principe du cogito : 'Je pense, donc je suis'.",
+  },
+  // ... (20 cartes au total dans le projet final)
+];
+---------------------------
+
+
+👉 L'algorithme de mélange : Fisher-Yates
+---------------------------
+// ❌ Mélange INCORRECT (Math.random()) — distribution non uniforme
+const malange = [...BANQUE_CARTES].sort(() => Math.random() - 0.5);
+// À ne jamais utiliser pour un vrai jeu de cartes
+
+// ✅ Mélange CORRECT — algorithme Fisher-Yates
+function melangerTableau(tableau) {
+  // On travaille sur une copie pour ne pas modifier l'original
+  const copie = [...tableau];
+
+  // On parcourt le tableau de la fin vers le début
+  for (let i = copie.length - 1; i > 0; i--) {
+    // On choisit un index aléatoire entre 0 et i (inclus)
+    const j = Math.floor(Math.random() * (i + 1));
+
+
+    // On échange les éléments aux positions i et j
+    [copie[i], copie[j]] = [copie[j], copie[i]];
+  }
+
+  return copie;
+}
+
+// Utilisation au démarrage de chaque session
+etat.cartes = melangerTableau(BANQUE_CARTES);
+---------------------------
+
+
+
+✅ 6.3 — Affichage de la carte courante : navigation par index, révélation par retournement
+
+👉 La structure HTML de l'application
+
+📃 index.html
+---------------------------
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards — Révision BAC</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="conteneur">
+    <!-- En-tête : titre et progression -->
+    <header class="entete">
+      <h1>Révision BAC</h1>
+      <div id="indicateur-progression"></div>
+    </header>
+
+    <!-- Zone de la flashcard (cliquable pour retourner) -->
+    <div class="scene-carte" id="scene-carte">
+      <div class="carte" id="carte">
+        <div class="face face-recto" id="face-question">
+          <span class="label-face">Question</span>
+          <p class="texte-carte" id="texte-question"></p>
+          <span class="categorie" id="categorie-carte"></span>
+        </div>
+        <div class="face face-verso" id="face-reponse">
+          <span class="label-face">Réponse</span>
+          <p class="texte-carte" id="texte-reponse"></p>
+          <p class="explication" id="texte-explication"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton de retournement -->
+    <button id="btn-retourner">Retourner la carte</button>
+
+
+    <!-- Boutons de résultat (visibles après retournement) -->
+    <div id="zone-reponse" class="cache">
+      <button id="btn-correct" class="btn-correct">Je savais ✓</button>
+      <button id="btn-incorrect" class="btn-incorrect">À revoir ✗</button>
+    </div>
+
+    <!-- Écran de résultats final (caché au départ) -->
+    <div id="ecran-resultats" class="cache"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+---------------------------
+
+
+👉 Afficher la carte courante
+---------------------------
+// Sélection des éléments DOM (en haut de script.js)
+const sceneCarte         = document.querySelector('#scene-carte');
+const carte              = document.querySelector('#carte');
+const texteQuestion      = document.querySelector('#texte-question');
+const texteReponse       = document.querySelector('#texte-reponse');
+const texteExplication   = document.querySelector('#texte-explication');
+const categorieEl        = document.querySelector('#categorie-carte');
+const indicateurProg     = document.querySelector('#indicateur-progression');
+const zoneReponse        = document.querySelector('#zone-reponse');
+const btnRetourner       = document.querySelector('#btn-retourner');
+
+// Afficher la carte à l'index courant
+function afficherCarteCourante() {
+  const carteData = etat.cartes[etat.indexCourant];
+
+  // Mettre à jour le contenu
+  texteQuestion.textContent    = carteData.question;
+  texteReponse.textContent     = carteData.reponse;
+  texteExplication.textContent = carteData.explication || '';
+  categorieEl.textContent      = carteData.categorie;
+
+  // Remettre la carte côté question
+  etat.estRetournee = false;
+  carte.classList.remove('retournee');
+  zoneReponse.classList.add('cache');
+  btnRetourner.textContent = 'Retourner la carte';
+
+
+  // Mettre à jour l'indicateur de progression
+  mettreAJourProgression();
+}
+---------------------------
+
+
+👉 L'indicateur de progression
+---------------------------
+function mettreAJourProgression() {
+  const total   = etat.cartes.length;
+  const courant = etat.indexCourant + 1;  // Afficher '1' pour l'index 0
+  const pourcent = Math.round((etat.indexCourant / total) * 100);
+
+  indicateurProg.innerHTML = `
+    <div class="progression-texte">
+      Carte ${courant} / ${total}
+      &nbsp;|&nbsp;
+      ✓ ${etat.bonnesReponses}  &nbsp; ✗ ${etat.mauvaisesReponses}
+    </div>
+    <div class="barre-progression">
+      <div class="remplissage" style="width: ${pourcent}%"></div>
+    </div>
+  `;
+}
+---------------------------
+
+
+👉 La logique de retournement
+---------------------------
+function retournerCarte() {
+  // Basculer l'état
+  etat.estRetournee = !etat.estRetournee;
+
+  // Ajouter ou retirer la classe CSS qui déclenche l'animation
+  carte.classList.toggle('retournee');
+
+  if (etat.estRetournee) {
+    // La réponse est maintenant visible
+    zoneReponse.classList.remove('cache');   // Afficher les boutons Correct/Incorrect
+    btnRetourner.textContent = 'Revoir la question';
+  } else {
+    // On est revenu à la question
+    zoneReponse.classList.add('cache');
+    btnRetourner.textContent = 'Retourner la carte';
+  }
+}
+
+// Brancher l'événement
+btnRetourner.addEventListener('click', retournerCarte);
+
+// Permettre aussi de cliquer directement sur la carte
+sceneCarte.addEventListener('click', retournerCarte);
+---------------------------
+
+
+
+✅ 6.4 — Suivi du score & de la progression : comptage bonnes/mauvaises réponses, logique de barre
+
+
+👉 Les boutons de réponse
+---------------------------
+const btnCorrect   = document.querySelector('#btn-correct');
+const btnIncorrect = document.querySelector('#btn-incorrect');
+
+btnCorrect.addEventListener('click', () => {
+  etat.bonnesReponses++;
+  avancerVersCarteSuivante();
+});
+
+btnIncorrect.addEventListener('click', () => {
+  etat.mauvaisesReponses++;
+  avancerVersCarteSuivante();
+});
+
+function avancerVersCarteSuivante() {
+  etat.indexCourant++;
+
+  if (etat.indexCourant >= etat.cartes.length) {
+    // Toutes les cartes ont été vues
+    etat.sessionTerminee = true;
+    afficherEcranResultats();
+  } else {
+    afficherCarteCourante();
+  }
+}
+---------------------------
+
+
+👉 L'animation de feedback sur le choix
+---------------------------
+function avancerVersCarteSuivante(estCorrect) {
+  // 1. Feedback visuel immédiat
+  carte.classList.add(estCorrect ? 'feedback-correct' : 'feedback-incorrect');
+
+  // 2. Attendre 600ms pour que l'animation soit visible
+  setTimeout(() => {
+    // 3. Nettoyer les classes de feedback
+    carte.classList.remove('feedback-correct', 'feedback-incorrect');
+
+    // 4. Avancer dans le jeu
+    etat.indexCourant++;
+    if (etat.indexCourant >= etat.cartes.length) {
+      etat.sessionTerminee = true;
+      afficherEcranResultats();
+    } else {
+      afficherCarteCourante();
+    }
+  }, 600);
+}
+
+// Mettre à jour les appels dans les événements
+btnCorrect.addEventListener('click', () => {
+  etat.bonnesReponses++;
+  avancerVersCarteSuivante(true);
+});
+
+btnIncorrect.addEventListener('click', () => {
+  etat.mauvaisesReponses++;
+  avancerVersCarteSuivante(false);
+});
+---------------------------
+
+
+👉 Le CSS du feedback
+---------------------------
+/* Feedback visuel sur le score */
+.feedback-correct {
+  outline: 4px solid #4CAF50;
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+  transition: outline 0.1s ease, box-shadow 0.1s ease;
+}
+
+.feedback-incorrect {
+  outline: 4px solid #F44336;
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+  transition: outline 0.1s ease, box-shadow 0.1s ease;
+}
+---------------------------
+
+
+👉 La barre de progression avec le taux de réussite
+---------------------------
+function mettreAJourProgression() {
+  const total       = etat.cartes.length;
+  const courant     = etat.indexCourant + 1;
+  const vus         = etat.bonnesReponses + etat.mauvaisesReponses;
+  const pourcent    = Math.round((etat.indexCourant / total) * 100);
+  const tauxReussite = vus > 0
+    ? Math.round((etat.bonnesReponses / vus) * 100)
+    : null;
+
+  const texteReussite = tauxReussite !== null
+    ? `&nbsp;|&nbsp; <span class="taux-${tauxReussite >= 70 ? 'bon' : 'mauvais'}">`,
+       `${tauxReussite}% de réussite</span>`
+    : '';
+
+  indicateurProg.innerHTML = `
+    <div class="progression-texte">
+      Carte ${courant} / ${total}
+      &nbsp;|&nbsp; ✓ ${etat.bonnesReponses} &nbsp; ✗ ${etat.mauvaisesReponses}
+      ${texteReussite}
+    </div>
+    <div class="barre-progression">
+      <div class="remplissage" style="width: ${pourcent}%"></div>
+    </div>
+  `;
+}
+---------------------------
+
+
+
+
+
+

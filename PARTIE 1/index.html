@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Demo</title>
+
+  <style>
+    .actif {
+      background: yellow;
+    }
+
+    .surligne {
+      border: 3px solid red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- index.html (extrait) -->
+
+  <h1 id="titre">Bonjour !</h1>
+
+  <p class="message">Un texte ici</p>
+
+  <button id="monBouton">Cliquez</button>
+
+  <input id="champTexte" placeholder="Tapez ici">
+
+  <script>
+
+    // Par ID
+    const titre = document.getElementById('titre');
+
+    // Par selecteur CSS
+    const bouton = document.querySelector('#monBouton');
+    const msg = document.querySelector('.message');
+    const para = document.querySelector('p');
+
+    // Plusieurs elements
+    const tousLesBoutons = document.querySelectorAll('button');
+
+    // Ecouter un clic
+    bouton.addEventListener('click', () => {
+      console.log('Le bouton a ete clique !');
+    });
+
+    // Ecouter la saisie
+    const champ = document.querySelector('#champTexte');
+
+    champ.addEventListener('input', (evenement) => {
+      console.log(evenement.target.value);
+    });
+
+    // Modifier le texte
+    titre.textContent = 'Bienvenue, Marie !';
+
+    // Modifier le HTML
+    titre.innerHTML = '<strong>Bienvenue</strong>, Marie !';
+
+    // Modifier le style
+    titre.style.color = 'blue';
+    titre.style.fontSize = '2rem';
+
+    // Ajouter / retirer une classe
+    titre.classList.add('actif');
+    titre.classList.toggle('surligne');
+
+  </script>
+
+</body>
+</html>

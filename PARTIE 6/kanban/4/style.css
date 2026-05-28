@@ -1,0 +1,279 @@
+/* =========================
+   RESET
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f7f8fb;
+  color: #1a1a2e;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.app-header {
+  padding: 20px 24px;
+  background: white;
+  border-bottom: 1px solid #e3e6eb;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.sous-titre {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* =========================
+   TABLEAU
+========================= */
+
+.tableau {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  overflow-x: auto;
+  min-height: calc(100vh - 90px);
+  align-items: flex-start;
+}
+
+/* =========================
+   COLONNES
+========================= */
+
+.colonne {
+  background: #f1f2f5;
+  border-radius: 12px;
+  width: 300px;
+  min-width: 300px;
+  padding: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  transition: background 0.2s, outline 0.2s;
+}
+
+/* Colonne active pendant drag */
+.colonne.depot-actif {
+  background: #dce8f8;
+  outline: 2px dashed #4a90d9;
+  outline-offset: -4px;
+}
+
+/* =========================
+   HEADER COLONNE
+========================= */
+
+.colonne-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.colonne-titre {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.colonne-compteur {
+  background: #dde1e9;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* =========================
+   LISTE CARTES
+========================= */
+
+.liste-cartes {
+  min-height: 80px;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  transition: background 0.2s;
+}
+
+/* =========================
+   CARTES
+========================= */
+
+.carte {
+  background: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+
+  border-left: 4px solid transparent;
+
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+
+  cursor: grab;
+
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+
+  animation: carte-apparition 0.2s ease;
+}
+
+.carte:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Carte déplacée */
+.carte.en-deplacement {
+  opacity: 0.4;
+  transform: rotate(2deg);
+  cursor: grabbing;
+}
+
+.carte-titre {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.carte-description {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.carte-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* =========================
+   PRIORITÉS
+========================= */
+
+.priorite-haute {
+  border-left-color: #e74c3c;
+}
+
+.priorite-moyenne {
+  border-left-color: #f39c12;
+}
+
+.priorite-basse {
+  border-left-color: #2ecc71;
+}
+
+.badge-priorite {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef1f5;
+}
+
+/* =========================
+   BOUTONS
+========================= */
+
+.btn-ajouter,
+.btn-valider,
+.btn-annuler,
+.btn-supprimer {
+  border: none;
+  cursor: pointer;
+}
+
+.btn-ajouter {
+  background: #e3e8f0;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.btn-ajouter:hover {
+  background: #d4dce8;
+}
+
+.btn-supprimer {
+  background: transparent;
+  color: #777;
+  font-size: 1rem;
+}
+
+.btn-supprimer:hover {
+  color: #e74c3c;
+}
+
+/* =========================
+   FORMULAIRE AJOUT
+========================= */
+
+.form-ajout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.input-titre,
+.select-priorite {
+  width: 100%;
+  padding: 10px;
+
+  border: 1px solid #d6d9df;
+  border-radius: 6px;
+
+  font: inherit;
+}
+
+.form-boutons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-valider {
+  background: #4a90d9;
+  color: white;
+
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.btn-annuler {
+  background: #e5e7ec;
+
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes carte-apparition {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

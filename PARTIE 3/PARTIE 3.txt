@@ -1,0 +1,896 @@
+🚀  JavaScript par la pratique
+Maîtrisez les bases et créez 5 applications interactives
+
+✅ PARTIE 3  —  App 2 : Gestionnaire de budget personnel
+Pages 61 – 84
+
+
+🎯  4.1 — Vue d'ensemble du projet : liste de fonctionnalités, modélisation des données, structure des dossiers
+
+👉Structure des dossiers
+
+rojet-budget/
+├── index.html    ← structure et contenu de la page
+├── style.css     ← apparence visuelle
+└── script.js     ← logique, données et comportement
+
+
+👉 Le code HTML de départ
+
+📃 index.html
+--------------------
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionnaire de budget</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="conteneur">
+    <h1>Mon Budget</h1>
+
+    <!-- Formulaire d'ajout de dépense -->
+    <div class="formulaire">
+      <input type="text" id="intitule"
+             placeholder="Intitulé (ex : courses Carrefour)">
+      <input type="number" id="montant"
+             placeholder="Montant (€)" min="0" step="0.01">
+      <select id="categorie">
+        <option value="Alimentation">Alimentation</option>
+        <option value="Transport">Transport</option>
+        <option value="Loisirs">Loisirs</option>
+        <option value="Logement">Logement</option>
+        <option value="Autre">Autre</option>
+      </select>
+      <button id="btn-ajouter">Ajouter</button>
+    </div>
+
+    <!-- Barre de filtres -->
+    <div class="filtres">
+      <button class="btn-filtre actif" data-cat="Tout">Tout</button>
+      <button class="btn-filtre" data-cat="Alimentation">Alimentation</button>
+      <button class="btn-filtre" data-cat="Transport">Transport</button>
+      <button class="btn-filtre" data-cat="Loisirs">Loisirs</button>
+      <button class="btn-filtre" data-cat="Logement">Logement</button>
+      <button class="btn-filtre" data-cat="Autre">Autre</button>
+    </div>
+
+    <!-- Total -->
+    <div class="total-zone">
+      Total : <span id="total">0.00 €</span>
+    </div>
+
+    <!-- Liste des dépenses -->
+    <ul id="liste-depenses"></ul>
+
+    <!-- Répartition par catégorie -->
+    <div id="repartition"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+--------------------
+
+
+
+🎯  4.2 — Modélisation des données avec des objets : schéma d'une dépense, génération d'ID unique
+
+👉 Le schéma d'une dépense
+--------------------
+// Une dépense est un objet avec quatre propriétés :
+const depense = {
+  id        : 1,               // identifiant unique (nombre entier)
+  intitule  : 'Courses bio',   // description textuelle (string)
+  montant   : 34.50,           // valeur numérique (number)
+  categorie : 'Alimentation'   // catégorie (string)
+--------------------
+
+ 👉 la structure de données centrale de notre application :
+--------------------
+// Tableau de dépenses — notre base de données locale
+let depenses = [
+  { id: 1, intitule: 'Courses bio',     montant: 34.50, categorie: 'Alimentation' },
+  { id: 2, intitule: 'Ticket de métro', montant:  1.90, categorie: 'Transport'    },
+  { id: 3, intitule: 'Cinéma',          montant: 12.00, categorie: 'Loisirs'      },
+];
+--------------------
+
+👉 Générer un identifiant unique
+--------------------
+// Compteur global — incrémenté à chaque nouvelle dépense
+let prochainId = 1;
+
+function creerDepense(intitule, montant, categorie) {
+  const nouvelleDepense = {
+    id        : prochainId,
+    intitule  : intitule,
+    montant   : montant,
+    categorie : categorie
+  };
+  prochainId++; // Incrémenter pour la prochaine dépense
+  return nouvelleDepense;
+}
+
+// Exemple d'utilisation :
+const d1 = creerDepense('Loyer', 850, 'Logement');
+console.log(d1); // { id: 1, intitule: 'Loyer', montant: 850, categorie: 'Logement' }
+
+const d2 = creerDepense('Bus', 1.90, 'Transport');
+console.log(d2); // { id: 2, intitule: 'Bus', montant: 1.90, categorie: 'Transport' }
+--------------------
+
+👉 Les variables d'état de l'application
+--------------------
+// === ÉTAT DE L'APPLICATION ===
+
+let depenses    = [];   // Tableau contenant toutes les dépenses
+let prochainId  = 1;    // Compteur pour les identifiants uniques
+let filtreCourant = 'Tout'; // Catégorie actuellement filtrée
+--------------------
+
+
+
+🎯 4.3 — Gestion d'un tableau d'entrées : push, splice, filtrage par catégorie
+
+👉 Ajouter une dépense avec push()
+--------------------
+function ajouterDepense(intitule, montant, categorie) {
+  // Créer l'objet dépense avec un id unique
+  const nouvelle = {
+    id        : prochainId++,
+    intitule  : intitule,
+    montant   : parseFloat(montant),
+    categorie : categorie
+  };
+
+  // Ajouter au tableau
+  depenses.push(nouvelle);
+
+  // Mettre à jour l'affichage
+  rendreInterface();
+}
+
+// Exemple :
+ajouterDepense('Abonnement Netflix', 13.99, 'Loisirs');
+console.log(depenses.length); // 1
+console.log(depenses[0].id);  // 1
+--------------------
+
+👉 Supprimer une dépense avec filter()
+--------------------
+function supprimerDepense(id) {
+  // Garder toutes les dépenses sauf celle avec l'id cible
+  depenses = depenses.filter(d => d.id !== id);
+
+  // Mettre à jour l'affichage
+  rendreInterface();
+}
+
+// Exemple : suppression de la dépense n°2
+console.log(depenses.length); // 3 avant
+supprimerDepense(2);
+console.log(depenses.length); // 2 après
+--------------------
+
+👉 Filtrer l'affichage par catégorie
+--------------------
+function obtenirDepensesFiltrees() {
+  // Si le filtre est 'Tout', renvoyer toutes les dépenses
+  if (filtreCourant === 'Tout') {
+    return depenses;
+  }
+  // Sinon, filtrer par catégorie
+  return depenses.filter(d => d.categorie === filtreCourant);
+}
+
+// Exemple avec 5 dépenses dont 2 en 'Transport' :
+filtreCourant = 'Transport';
+const visible = obtenirDepensesFiltrees();
+console.log(visible.length); // 2
+console.log(depenses.length); // 5 — le tableau original est intact
+--------------------
+
+
+
+🎯 4.4 — Rendu dynamique de listes : createElement, appendChild, boucles innerHTML
+
+👉 Deux approches pour construire le DOM dynamiquement
+
+* Approche 1 — innerHTML : écrire du HTML sous forme de chaîne de caractères
+--------------------
+// innerHTML : rapide à écrire, mais attention à la sécurité
+function afficherDepense(depense) {
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <span class="intitule">${depense.intitule}</span>
+    <span class="montant">${depense.montant.toFixed(2)} €</span>
+    <span class="categorie">${depense.categorie}</span>
+    <button class="btn-suppr" data-id="${depense.id}">✕</button>
+  `;
+  return li;
+}
+--------------------
+
+* Approche 2 — createElement + appendChild : construire le DOM élément par élément
+--------------------
+// createElement : plus verbeux, mais plus sûr et plus explicite
+function afficherDepenseSecurise(depense) {
+  const li       = document.createElement('li');
+  const spanTitre = document.createElement('span');
+  const spanMontant = document.createElement('span');
+  const btnSuppr = document.createElement('button');
+
+  spanTitre.textContent   = depense.intitule;
+  spanMontant.textContent = depense.montant.toFixed(2) + ' €';
+  btnSuppr.textContent    = '✕';
+  btnSuppr.dataset.id     = depense.id;
+  btnSuppr.className      = 'btn-suppr';
+
+  li.appendChild(spanTitre);
+  li.appendChild(spanMontant);
+  li.appendChild(btnSuppr);
+  return li;
+}
+--------------------
+
+
+👉 La fonction rendreInterface()
+--------------------
+function rendreInterface() {
+  const liste = document.querySelector('#liste-depenses');
+  const spanTotal = document.querySelector('#total');
+
+  // Effacer la liste actuelle
+  liste.innerHTML = '';
+
+  // Obtenir les dépenses à afficher (avec filtre éventuel)
+  const depensesVisibles = obtenirDepensesFiltrees();
+
+  // Construire un <li> pour chaque dépense visible
+  depensesVisibles.forEach(depense => {
+    const li = document.createElement('li');
+    li.className = 'item-depense';
+    li.dataset.id = depense.id;
+
+    li.innerHTML = `
+      <div class="info-depense">
+        <span class="intitule">${depense.intitule}</span>
+        <span class="badge badge-${depense.categorie.toLowerCase()}">
+          ${depense.categorie}
+        </span>
+      </div>
+      <div class="droite">
+        <span class="montant">${depense.montant.toFixed(2)} €</span>
+        <button class="btn-suppr" data-id="${depense.id}">✕</button>
+      </div>
+    `;
+    liste.appendChild(li);
+  });
+
+  // Mettre à jour le total
+  const total = calculerTotal(depenses);
+  spanTotal.textContent = total.toFixed(2) + ' €';
+
+  // Mettre à jour la répartition
+  afficherRepartition();
+}
+--------------------
+
+
+
+🎯 4.5 — Calcul des totaux avec reduce() : explication pas à pas, totaux cumulatifs
+
+👉 Comprendre reduce() par l'exemple
+--------------------
+// Tableau de nombres simples
+const nombres = [10, 20, 30, 40];
+
+// Avec une boucle classique :
+let total = 0;
+for (let n of nombres) {
+  total += n;
+}
+console.log(total); // 100
+
+// Avec reduce() :
+const total2 = nombres.reduce((accumulateur, valeurCourante) => {
+  return accumulateur + valeurCourante;
+}, 0); // 0 est la valeur de départ de l'accumulateur
+
+console.log(total2); // 100 — même résultat, code plus court
+--------------------
+
+👉 Déroulement pas à pas
+--------------------
+// nombres = [10, 20, 30, 40], valeur initiale = 0
+
+// Itération 1 : accumulateur = 0,  valeurCourante = 10  → renvoie 10
+// Itération 2 : accumulateur = 10, valeurCourante = 20  → renvoie 30
+// Itération 3 : accumulateur = 30, valeurCourante = 30  → renvoie 60
+// Itération 4 : accumulateur = 60, valeurCourante = 40  → renvoie 100
+
+// Résultat final : 100
+--------------------
+
+👉 Appliquer reduce() à nos dépenses
+--------------------
+function calculerTotal(tableau) {
+  return tableau.reduce((acc, depense) => {
+    return acc + depense.montant; // On accumule les montants
+  }, 0); // Valeur initiale : 0
+}
+
+// Exemple avec 3 dépenses :
+const mesDepenses = [
+  { id: 1, intitule: 'Loyer',    montant: 850,  categorie: 'Logement'     },
+  { id: 2, intitule: 'Courses',  montant: 67.40, categorie: 'Alimentation' },
+  { id: 3, intitule: 'Cinéma',   montant: 12,   categorie: 'Loisirs'      },
+];
+
+console.log(calculerTotal(mesDepenses)); // 929.4
+console.log(calculerTotal(mesDepenses).toFixed(2)); // '929.40'
+--------------------
+
+👉 Calculer des totaux par catégorie
+--------------------
+function calculerTotauxParCategorie() {
+  return depenses.reduce((acc, depense) => {
+    const cat = depense.categorie;
+
+    // Si la catégorie n'existe pas encore dans l'accumulateur, l'initialiser à 0
+    if (!acc[cat]) {
+      acc[cat] = 0;
+    }
+
+    // Ajouter le montant
+    acc[cat] += depense.montant;
+
+    return acc;
+  }, {}); // Valeur initiale : objet vide
+}
+
+// Exemple de résultat :
+// {
+//   Alimentation : 102.90,
+//   Transport    : 38.40,
+//   Loisirs      : 25.00
+// }
+--------------------
+
+
+
+🎯 4.6 — Suppression & filtrage d'entrées : délégation d'événements, patron de re-rendu
+
+👉 La solution : la délégation d'événements
+--------------------
+// Au lieu d'ajouter un écouteur sur chaque bouton ✕ individuel...
+// On attache UN SEUL écouteur sur la liste parente.
+
+const liste = document.querySelector('#liste-depenses');
+
+liste.addEventListener('click', (event) => {
+  // Vérifier si c'est bien un bouton de suppression qui a été cliqué
+  if (event.target.classList.contains('btn-suppr')) {
+
+    // Lire l'id stocké dans data-id
+    const id = Number(event.target.dataset.id);
+
+    // Supprimer la dépense correspondante
+    supprimerDepense(id);
+  }
+});
+--------------------
+
+👉 Branchement des filtres de catégorie
+--------------------
+const zoneFiltre = document.querySelector('.filtres');
+
+zoneFiltre.addEventListener('click', (event) => {
+  // Vérifier si c'est un bouton de filtre
+  if (event.target.classList.contains('btn-filtre')) {
+
+    // Mettre à jour le filtre actif
+    filtreCourant = event.target.dataset.cat;
+
+    // Mettre à jour l'apparence des boutons
+    document.querySelectorAll('.btn-filtre').forEach(b => {
+      b.classList.remove('actif');
+    });
+    event.target.classList.add('actif');
+
+    // Re-rendre la liste avec le nouveau filtre
+    rendreInterface();
+  }
+});
+--------------------
+
+👉 Le patron de re-rendu
+--------------------
+// Patron de re-rendu — la règle d'or :
+// 1. Modifier les données (tableau depenses)
+// 2. Appeler rendreInterface()
+// 3. L'interface reflète exactement les données
+
+// Ajout :
+depenses.push(nouvelle);
+rendreInterface(); // ← toujours appelé après
+
+// Suppression :
+depenses = depenses.filter(d => d.id !== id);
+rendreInterface(); // ← toujours appelé après
+
+// Filtrage :
+filtreCourant = 'Transport';
+rendreInterface(); // ← toujours appelé après
+--------------------
+
+
+
+🎯  4.7 — Affichage par catégorie : patron group-by, barres de pourcentage en CSS
+
+👉 Le patron group-by
+--------------------
+function calculerRepartition() {
+  if (depenses.length === 0) return {};
+
+  const totalGeneral = calculerTotal(depenses);
+
+  // Étape 1 : grouper et sommer par catégorie
+  const parCategorie = depenses.reduce((acc, d) => {
+    if (!acc[d.categorie]) acc[d.categorie] = 0;
+    acc[d.categorie] += d.montant;
+    return acc;
+  }, {});
+
+  // Étape 2 : convertir en tableau avec pourcentages
+  const resultat = {};
+  for (const cat in parCategorie) {
+    resultat[cat] = {
+      total      : parCategorie[cat],
+      pourcentage: (parCategorie[cat] / totalGeneral * 100).toFixed(1)
+    };
+  }
+  return resultat;
+}
+--------------------
+
+👉 Les couleurs par catégorie
+ --------------------
+const COULEURS_CAT = {
+  'Alimentation' : '#4CAF50', // vert
+  'Transport'    : '#2196F3', // bleu
+  'Loisirs'      : '#FF9800', // orange
+  'Logement'     : '#9C27B0', // violet
+  'Autre'        : '#607D8B'  // gris ardoise
+};
+--------------------
+
+ 👉 Afficher les barres de pourcentage
+--------------------
+function afficherRepartition() {
+  const zone = document.querySelector('#repartition');
+  const repartition = calculerRepartition();
+
+  if (Object.keys(repartition).length === 0) {
+    zone.innerHTML = '';
+    return;
+  }
+
+  let html = '<h2>Répartition par catégorie</h2>';
+
+  for (const cat in repartition) {
+    const { total, pourcentage } = repartition[cat];
+    const couleur = COULEURS_CAT[cat] || '#999';
+
+    html += `
+      <div class="ligne-categorie">
+        <div class="label-cat">
+          <span class="nom-cat">${cat}</span>
+          <span class="montant-cat">${total.toFixed(2)} €
+            (${pourcentage} %)</span>
+        </div>
+        <div class="barre-fond">
+          <div class="barre-remplie"
+               style="width: ${pourcentage}%;
+                      background-color: ${couleur};">
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  zone.innerHTML = html;
+}
+--------------------
+
+👉 Le CSS des barres de progression
+--------------------
+/* Zone de répartition */
+#repartition {
+  margin-top: 2rem;
+}
+
+#repartition h2 {
+  font-size: 1rem;
+  color: #1F3864;
+  margin-bottom: 0.8rem;
+}
+
+.ligne-categorie {
+  margin-bottom: 0.8rem;
+}
+
+.label-cat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.nom-cat    { font-weight: bold; color: #333; }
+.montant-cat { color: #666; }
+
+/* Fond gris de la barre */
+.barre-fond {
+  background: #E0E0E0;
+  border-radius: 4px;
+  height: 12px;
+  overflow: hidden;
+}
+
+/* Partie colorée qui représente le pourcentage */
+.barre-remplie {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease; /* Animation douce */
+}
+--------------------
+
+
+👉 Le CSS de l'application complète
+
+📃 style.css
+---------------------
+/* === style.css — Gestionnaire de budget === */
+
+/* Fond et mise en page générale */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  margin: 0;
+}
+
+.conteneur {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 520px;
+  max-width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+h1 { text-align: center; color: #1F3864; margin-bottom: 1.5rem; }
+
+/* Formulaire d'ajout */
+.formulaire {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.formulaire input,
+.formulaire select {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.formulaire input:first-child,
+.formulaire select { grid-column: 1 / -1; }
+
+#btn-ajouter {
+  grid-column: 1 / -1;
+  padding: 0.7rem;
+  background: #2E75B6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#btn-ajouter:hover { background: #1F3864; }
+
+/* Filtres */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.btn-filtre {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #2E75B6;
+  border-radius: 20px;
+  background: white;
+  color: #2E75B6;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-filtre.actif {
+  background: #2E75B6;
+  color: white;
+}
+
+/* Total */
+.total-zone {
+  background: #EBF3FB;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+#total { font-weight: bold; color: #1F3864; font-size: 1.3rem; }
+
+/* Liste des dépenses */
+#liste-depenses {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.item-depense {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.item-depense:last-child { border-bottom: none; }
+
+.info-depense { display: flex; align-items: center; gap: 0.6rem; }
+.intitule { font-weight: bold; color: #222; }
+
+/* Badges de catégorie */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  color: white;
+}
+
+.badge-alimentation { background: #4CAF50; }
+.badge-transport    { background: #2196F3; }
+.badge-loisirs      { background: #FF9800; }
+.badge-logement     { background: #9C27B0; }
+.badge-autre        { background: #607D8B; }
+
+/* Partie droite de chaque ligne */
+.droite { display: flex; align-items: center; gap: 0.8rem; }
+.montant { font-weight: bold; color: #1F3864; min-width: 70px; text-align: right; }
+
+/* Bouton de suppression */
+.btn-suppr {
+  background: none;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-suppr:hover { background: #e74c3c; color: white; }
+
+/* Responsive mobile */
+@media (max-width: 580px) {
+  .conteneur { padding: 1.2rem; }
+  .formulaire { grid-template-columns: 1fr; }
+  .formulaire input:first-child,
+  .formulaire select { grid-column: 1; }
+}
+--------------------
+
+
+👉 Le code JavaScript final complet
+
+📃 script.js
+--------------------
+// =============================================
+// GESTIONNAIRE DE BUDGET PERSONNEL
+// =============================================
+
+// --- Couleurs par catégorie ---
+const COULEURS_CAT = {
+  'Alimentation' : '#4CAF50',
+  'Transport'    : '#2196F3',
+  'Loisirs'      : '#FF9800',
+  'Logement'     : '#9C27B0',
+  'Autre'        : '#607D8B'
+};
+
+// --- État de l'application ---
+let depenses      = [];
+let prochainId    = 1;
+let filtreCourant = 'Tout';
+
+// --- Sélection des éléments DOM ---
+const inputIntitule  = document.querySelector('#intitule');
+const inputMontant   = document.querySelector('#montant');
+const selectCategorie = document.querySelector('#categorie');
+const btnAjouter     = document.querySelector('#btn-ajouter');
+const spanTotal      = document.querySelector('#total');
+const listeDep       = document.querySelector('#liste-depenses');
+const zoneFiltre     = document.querySelector('.filtres');
+const zoneRepartition = document.querySelector('#repartition');
+
+// =============================================
+// LOGIQUE MÉTIER
+// =============================================
+
+function ajouterDepense(intitule, montant, categorie) {
+  depenses.push({
+    id        : prochainId++,
+    intitule  : intitule,
+    montant   : parseFloat(montant),
+    categorie : categorie
+  });
+  rendreInterface();
+}
+
+function supprimerDepense(id) {
+  depenses = depenses.filter(d => d.id !== id);
+  rendreInterface();
+}
+
+function obtenirDepensesFiltrees() {
+  if (filtreCourant === 'Tout') return depenses;
+  return depenses.filter(d => d.categorie === filtreCourant);
+}
+
+function calculerTotal(tableau) {
+  return tableau.reduce((acc, d) => acc + d.montant, 0);
+}
+
+function calculerRepartition() {
+  if (depenses.length === 0) return {};
+  const totalGeneral = calculerTotal(depenses);
+  const parCat = depenses.reduce((acc, d) => {
+    if (!acc[d.categorie]) acc[d.categorie] = 0;
+    acc[d.categorie] += d.montant;
+    return acc;
+  }, {});
+  const result = {};
+  for (const cat in parCat) {
+    result[cat] = {
+      total      : parCat[cat],
+      pourcentage: (parCat[cat] / totalGeneral * 100).toFixed(1)
+    };
+  }
+  return result;
+}
+
+// =============================================
+// RENDU DE L'INTERFACE
+// =============================================
+
+function rendreInterface() {
+  // 1. Effacer et reconstruire la liste
+  listeDep.innerHTML = '';
+  obtenirDepensesFiltrees().forEach(d => {
+    const li = document.createElement('li');
+    li.className = 'item-depense';
+    li.innerHTML = `
+      <div class="info-depense">
+        <span class="intitule">${d.intitule}</span>
+        <span class="badge badge-${d.categorie.toLowerCase()}">${d.categorie}</span>
+      </div>
+      <div class="droite">
+        <span class="montant">${d.montant.toFixed(2)} €</span>
+        <button class="btn-suppr" data-id="${d.id}">✕</button>
+      </div>
+    `;
+    listeDep.appendChild(li);
+  });
+
+  // 2. Mettre à jour le total
+  spanTotal.textContent = calculerTotal(depenses).toFixed(2) + ' €';
+
+  // 3. Mettre à jour la répartition
+  afficherRepartition();
+}
+
+function afficherRepartition() {
+  const repartition = calculerRepartition();
+  if (Object.keys(repartition).length === 0) {
+    zoneRepartition.innerHTML = '';
+    return;
+  }
+  let html = '<h2>Répartition par catégorie</h2>';
+  for (const cat in repartition) {
+    const { total, pourcentage } = repartition[cat];
+    const couleur = COULEURS_CAT[cat] || '#999';
+    html += `
+      <div class="ligne-categorie">
+        <div class="label-cat">
+          <span class="nom-cat">${cat}</span>
+          <span class="montant-cat">${total.toFixed(2)} € (${pourcentage} %)</span>
+        </div>
+        <div class="barre-fond">
+          <div class="barre-remplie"
+               style="width:${pourcentage}%; background:${couleur}">
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  zoneRepartition.innerHTML = html;
+}
+
+// =============================================
+// ÉCOUTEURS D'ÉVÉNEMENTS
+// =============================================
+
+// Bouton Ajouter
+btnAjouter.addEventListener('click', () => {
+  const intitule  = inputIntitule.value.trim();
+  const montant   = parseFloat(inputMontant.value);
+  const categorie = selectCategorie.value;
+
+  if (!intitule || isNaN(montant) || montant <= 0) {
+    alert('Veuillez renseigner un intitulé et un montant valide.');
+    return;
+  }
+
+  ajouterDepense(intitule, montant, categorie);
+
+  // Réinitialiser le formulaire
+  inputIntitule.value = '';
+  inputMontant.value  = '';
+  inputIntitule.focus();
+});
+
+// Suppression par délégation d'événements
+listeDep.addEventListener('click', (event) => {
+  if (event.target.classList.contains('btn-suppr')) {
+    supprimerDepense(Number(event.target.dataset.id));
+  }
+});
+
+// Filtres par délégation d'événements
+zoneFiltre.addEventListener('click', (event) => {
+  if (event.target.classList.contains('btn-filtre')) {
+    filtreCourant = event.target.dataset.cat;
+    document.querySelectorAll('.btn-filtre').forEach(b => b.classList.remove('actif'));
+    event.target.classList.add('actif');
+    rendreInterface();
+  }
+});
+
+// Initialisation — afficher l'interface vide au démarrage
+rendreInterface();
+--------------------
+
+
+
+

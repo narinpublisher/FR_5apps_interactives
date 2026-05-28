@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Démonstration Promise</title>
+</head>
+<body>
+
+  <h1>Démo des Promises JavaScript</h1>
+
+  <button id="successBtn">
+    Simuler une requête réussie
+  </button>
+
+  <button id="errorBtn">
+    Simuler une erreur réseau
+  </button>
+
+  <p>
+    Ouvrez la console du navigateur pour voir les Promises.
+  </p>
+
+  <script>
+
+    function requeteReussie() {
+
+      console.log("Promise créée :");
+
+      const promesse = new Promise((resolve, reject) => {
+
+        setTimeout(() => {
+
+          resolve({
+            ville: "Paris",
+            temperature: 22
+          });
+
+        }, 2000);
+
+      });
+
+      console.log(promesse);
+
+      promesse
+        .then(donnees => {
+
+          console.log("Succès :", donnees);
+
+        })
+        .catch(erreur => {
+
+          console.log("Erreur :", erreur.message);
+
+        })
+        .finally(() => {
+
+          console.log("Opération terminée");
+
+        });
+
+    }
+
+    function requeteErreur() {
+
+      console.log("Promise créée :");
+
+      const promesse = new Promise((resolve, reject) => {
+
+        setTimeout(() => {
+
+          reject(new Error("URL incorrecte"));
+
+        }, 2000);
+
+      });
+
+      console.log(promesse);
+
+      promesse
+        .then(donnees => {
+
+          console.log("Succès :", donnees);
+
+        })
+        .catch(erreur => {
+
+          console.log("Erreur :", erreur.message);
+
+        })
+        .finally(() => {
+
+          console.log("Opération terminée");
+
+        });
+
+    }
+
+    document
+      .getElementById("successBtn")
+      .addEventListener("click", requeteReussie);
+
+    document
+      .getElementById("errorBtn")
+      .addEventListener("click", requeteErreur);
+
+  </script>
+
+</body>
+</html>

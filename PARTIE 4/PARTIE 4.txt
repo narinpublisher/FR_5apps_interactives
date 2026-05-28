@@ -1,0 +1,1007 @@
+🎯 JavaScript par la pratique
+Maîtrisez les bases et créez 5 applications interactives
+
+🚀 PARTIE 4  —  App 3 : Tableau de bord météo en temps réel
+
+
+
+✅ 5.1 — Fondamentaux de l’asynchrone : pile d’appels, boucle d’événements, pourquoi l’asynchrone
+
+
+👉 JavaScript est mono-thread 
+
+* Pour illustrer le problème, imaginez ce code synchrone (bloquant) :
+-------------------------------
+// Code SYNCHRONE (bloquant) — ne faites jamais ceci pour les requêtes réseau
+console.log("Début");
+
+// Simulation d'une attente de 3 secondes (bloque tout)
+const debut = Date.now();
+while (Date.now() - debut < 3000) { /* attente active */ }
+
+console.log("Fin — 3 secondes plus tard");
+// Pendant ces 3 secondes : la page est totalement figée.
+// L'utilisateur ne peut rien faire.
+-------------------------------
+
+
+👉 La pile d’appels (call stack)
+-------------------------------
+function direBonjour() {
+  console.log("Bonjour !");
+}
+
+function demarrer() {
+  console.log("Démarrage...");
+  direBonjour();           // direBonjour() est empilée
+  console.log("Terminé."); // direBonjour() est dépilée
+}
+
+demarrer();
+
+// Ordre d'exécution :
+// 1. demarrer() est empilée
+// 2. "Démarrage..." est affiché
+// 3. direBonjour() est empilée
+// 4. "Bonjour !" est affiché
+// 5. direBonjour() est dépilée
+// 6. "Terminé." est affiché
+// 7. demarrer() est dépilée
+-------------------------------
+
+👉 La boucle d’événements (event loop)
+
+* En pratique, cela ressemble à ceci :
+-------------------------------
+console.log("1 — Avant la requête");
+
+// setTimeout simule une opération asynchrone (ici : attendre 2 secondes)
+setTimeout(() => {
+  console.log("3 — Résultat après 2 secondes");
+}, 2000);
+
+console.log("2 — Après le setTimeout (exécuté AVANT le callback !)");
+
+// Sortie dans la console :
+// 1 — Avant la requête
+// 2 — Après le setTimeout
+// 3 — Résultat après 2 secondes  (2 secondes plus tard)
+-------------------------------
+
+
+
+✅ 5.2 — Explication des Promises : then/catch/finally, chaînes de promesses, états d’erreur
+
+👉 Créer une Promise
+-------------------------------
+// Créer une Promise manuellement
+const maPromesse = new Promise((resolve, reject) => {
+  // Code asynchrone ici
+  const succes = true; // Simulons un succès
+
+  if (succes) {
+    resolve("Les données sont arrivées !"); // Promise fulfilled
+  } else {
+    reject(new Error("Le serveur est injoignable.")); // Promise rejected
+  }
+});
+
+// La Promise est maintenant dans l'état "pending"
+// (immédiatement fulfilled dans cet exemple synchrone)
+-------------------------------
+
+
+👉 Consommer une Promise avec .then(), .catch() et .finally()
+-------------------------------
+maPromesse
+  .then(resultat => {
+    // Exécuté si la Promise est fulfilled
+    console.log("Succès :", resultat); // "Les données sont arrivées !"
+  })
+  .catch(erreur => {
+    // Exécuté si la Promise est rejected
+    console.error("Erreur :", erreur.message);
+  })
+  .finally(() => {
+    // Exécuté dans TOUS les cas (succès ou erreur)
+    console.log("Opération terminée (succès ou non).");
+  });
+-------------------------------
+
+
+👉 Les chaînes de Promises
+-------------------------------
+// Chaîne de Promises — traitement des données étape par étape
+fetch("https://api.exemple.com/meteo?ville=Paris")
+  .then(reponse => {
+    // Étape 1 : vérifier que la réponse est correcte
+    if (!reponse.ok) {
+      throw new Error("Réponse serveur incorrecte : " + reponse.status);
+    }
+    return reponse.json(); // Renvoie une nouvelle Promise
+  })
+  .then(donnees => {
+    // Étape 2 : utiliser les données JSON
+    console.log("Température à Paris :", donnees.main.temp, "°C");
+    afficherMeteo(donnees);
+  })
+  .catch(erreur => {
+    // Un seul .catch() capture TOUTES les erreurs de la chaîne
+    console.error("Une erreur s'est produite :", erreur.message);
+    afficherErreur(erreur.message);
+  });
+-------------------------------
+
+
+
+✅ 5.3 — Syntaxe async/await : convertir des chaînes de Promises en async/await
+
+
+👉 Le mot-clé async
+-------------------------------
+// Fonction asynchrone déclarée avec "async"
+async function obtenirMeteo(ville) {
+  // Le corps de la fonction peut utiliser "await"
+  return "Données météo pour " + ville;
+}
+
+// La valeur de retour est automatiquement enveloppée dans une Promise
+obtenirMeteo("Paris").then(msg => console.log(msg));
+// Affiche : "Données météo pour Paris"
+-------------------------------
+
+
+👉 Le mot-clé await
+-------------------------------
+// Sans async/await — avec des Promises enchaînées
+function chargerMeteo() {
+  fetch("https://api.openweathermap.org/data/2.5/weather?q=Paris&appid=CLE")
+    .then(reponse => reponse.json())
+    .then(donnees => afficherMeteo(donnees))
+    .catch(erreur => afficherErreur(erreur.message));
+}
+
+// Avec async/await — beaucoup plus lisible
+async function chargerMeteo() {
+  const reponse = await fetch("https://api.openweathermap.org/data/2.5/weather?q=Paris&appid=CLE");
+  const donnees = await reponse.json();
+  afficherMeteo(donnees);
+}
+// Résultat identique — syntaxe bien plus claire
+-------------------------------
+
+
+👉 Gérer les erreurs avec try/catch
+-------------------------------
+async function chargerMeteo(ville) {
+  try {
+    // Code qui pourrait échouer
+    const reponse = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=VOTRE_CLE&units=metric&lang=fr`
+    );
+
+    if (!reponse.ok) {
+      // Erreur HTTP (ville introuvable, clé invalide...)
+      throw new Error(`Erreur serveur : ${reponse.status}`);
+    }
+
+    const donnees = await reponse.json();
+    afficherMeteo(donnees);
+
+  } catch (erreur) {
+    // Capture toutes les erreurs (réseau, JSON, notre throw...)
+    console.error("Impossible de charger la météo :", erreur.message);
+    afficherMessageErreur(erreur.message);
+
+  } finally {
+    // Toujours exécuté — masquer le spinner
+    masquerSpinner();
+  }
+}
+-------------------------------
+
+
+
+✅ 5.4 — L’API Fetch : requêtes GET, response.json(), codes de statut HTTP
+
+
+👉 La requête GET : la base de tout
+-------------------------------
+// La forme la plus simple de fetch()
+const reponse = await fetch("https://api.exemple.com/donnees");
+
+// reponse est un objet Response — pas encore les données !
+console.log(reponse.status); // 200 (OK)
+console.log(reponse.ok);     // true (si status entre 200 et 299)
+
+// Pour obtenir les données JSON, il faut appeler .json()
+const donnees = await reponse.json();
+console.log(donnees); // L'objet JavaScript extrait du JSON
+-------------------------------
+
+
+👉 Un exemple de fetch() complet avec gestion des erreurs
+-------------------------------
+async function fetchMeteo(ville) {
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=VOTRE_CLE&units=metric&lang=fr`;
+    const reponse = await fetch(url);
+
+
+    // Vérification manuelle du code HTTP
+    if (!reponse.ok) {
+      if (reponse.status === 404) {
+        throw new Error(`Ville "${ville}" introuvable. Vérifiez l'orthographe.`);
+      }
+      if (reponse.status === 401) {
+        throw new Error("Clé API invalide. Vérifiez votre configuration.");
+      }
+      throw new Error(`Erreur inattendue : ${reponse.status}`);
+    }
+
+
+    const donnees = await reponse.json();
+    return donnees;
+
+
+  } catch (erreur) {
+    // Erreur réseau (pas de connexion) ou erreur throw ci-dessus
+    throw erreur; // On re-propage pour que l'appelant puisse la gérer
+  }
+}
+-------------------------------
+
+
+
+✅ 5.5 — Choisir une API météo gratuite : configuration OpenWeatherMap, gestion des clés API
+
+
+👉 Étape 3 — Comprendre l’URL de l’API
+------------------------------
+https://api.openweathermap.org/data/2.5/weather
+  ?q=Paris        ← Nom de la ville (ou "Paris,FR" pour plus de précision)
+  &appid=CLE_API  ← Votre clé API personnelle
+  &units=metric   ← Température en Celsius (imperial = Fahrenheit)
+  &lang=fr        ← Descriptions météo en français
+
+// URL complète (en une ligne) :
+// https://api.openweathermap.org/data/2.5/weather?q=Paris&appid=VOTRE_CLE&units=metric&lang=fr
+------------------------------
+
+
+👉 Stocker la clé API sécurisément
+------------------------------
+// En haut de script.js — votre configuration
+const CONFIG = {
+  CLE_API  : "REMPLACEZ_PAR_VOTRE_VRAIE_CLE",
+  URL_BASE : "https://api.openweathermap.org/data/2.5/weather",
+  LANGUE   : "fr",
+  UNITES   : "metric"   // metric = Celsius, imperial = Fahrenheit
+};
+
+// Fonction utilitaire pour construire l'URL
+function construireURL(ville) {
+  return `${CONFIG.URL_BASE}?q=${encodeURIComponent(ville)}&appid=${CONFIG.CLE_API}&units=${CONFIG.UNITES}&lang=${CONFIG.LANGUE}`;
+}
+------------------------------
+
+
+✅ 5.6 — Parsing & affichage JSON : destructuration des réponses API, mapping vers l’UI
+
+
+👉 La structure de la réponse JSON
+------------------------------
+// Structure simplifiée de la réponse JSON
+{
+  "name"    : "Paris",          // Nom de la ville
+  "sys"     : {
+    "country" : "FR"            // Code pays
+  },
+  "main"    : {
+    "temp"     : 18.4,          // Température actuelle (°C)
+    "feels_like": 17.1,         // Ressenti (°C)
+    "humidity" : 72,            // Humidité (%)
+    "temp_min" : 16.0,          // Température minimale
+    "temp_max" : 21.2           // Température maximale
+  },
+  "weather" : [
+    {
+      "description": "ciel dégagé",   // Description (en français si lang=fr)
+      "icon"        : "01d"            // Code icône météo
+    }
+  ],
+  "wind"    : {
+    "speed" : 3.6                // Vitesse du vent (m/s)
+  },
+  "visibility": 10000            // Visibilité (mètres)
+}
+------------------------------
+
+
+👉 Extraire les données avec la destructuration
+------------------------------
+function extraireInfosMeteo(donnees) {
+  // Destructuration des propriétés qui nous intéressent
+  const {
+    name,
+    sys: { country },
+    main: { temp, feels_like, humidity, temp_min, temp_max },
+    weather: [{ description, icon }],
+    wind: { speed: vitesseVent },
+    visibility
+  } = donnees;
+
+
+  // Retourner un objet "aplati" avec les données nettoyées
+  return {
+    ville       : `${name}, ${country}`,
+    temperature : Math.round(temp),
+    ressenti    : Math.round(feels_like),
+    humidite    : humidity,
+    tempMin     : Math.round(temp_min),
+    tempMax     : Math.round(temp_max),
+    description : description.charAt(0).toUpperCase() + description.slice(1),
+    icone       : `https://openweathermap.org/img/wn/${icon}@2x.png`,
+    vent        : (vitesseVent * 3.6).toFixed(1),  // m/s → km/h
+    visibilite  : (visibility / 1000).toFixed(1)   // m → km
+  };
+}
+------------------------------
+
+
+👉 Construire l’interface HTML depuis les données
+------------------------------
+function afficherMeteo(infos) {
+  const zone = document.querySelector("#carte-meteo");
+
+  zone.innerHTML = `
+    <div class="entete-meteo">
+      <div class="nom-ville">${infos.ville}</div>
+      <img class="icone-meteo"
+           src="${infos.icone}"
+           alt="${infos.description}">
+    </div>
+
+    <div class="temperature-principale">
+      ${infos.temperature}<span class="unite">°C</span>
+    </div>
+
+    <div class="description">${infos.description}</div>
+
+    <div class="details-meteo">
+      <div class="detail">
+        <span class="label-detail">Ressenti</span>
+        <span class="valeur-detail">${infos.ressenti}°C</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Humidité</span>
+        <span class="valeur-detail">${infos.humidite}%</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Vent</span>
+        <span class="valeur-detail">${infos.vent} km/h</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Visibilité</span>
+        <span class="valeur-detail">${infos.visibilite} km</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Min / Max</span>
+        <span class="valeur-detail">${infos.tempMin}° / ${infos.tempMax}°</span>
+      </div>
+    </div>
+  `;
+}
+------------------------------
+
+
+
+✅ 5.7 — États de chargement & gestion d’erreurs : spinner UI, try/catch, messages d’erreur
+
+
+👉 Le HTML pour les trois états
+------------------------------
+<!-- index.html — zones pour les différents états -->
+<div id="zone-chargement" class="cache">
+  <div class="spinner"></div>
+  <p>Récupération de la météo...</p>
+</div>
+
+<div id="carte-meteo" class="cache">
+  <!-- Contenu injecté par JavaScript -->
+</div>
+
+<div id="zone-erreur" class="cache">
+  <p id="message-erreur"></p>
+  <button id="btn-reessayer">Réessayer</button>
+</div>
+
+<!-- CSS: .cache { display: none; } — masqué par défaut -->
+------------------------------
+
+
+👉 Gérer les états en JavaScript
+------------------------------
+// Sélectionner toutes les zones d'état
+const zoneChargement = document.querySelector("#zone-chargement");
+const carteMeteo     = document.querySelector("#carte-meteo");
+const zoneErreur     = document.querySelector("#zone-erreur");
+const msgErreur      = document.querySelector("#message-erreur");
+
+// Fonctions utilitaires pour changer d'état
+function afficherChargement() {
+  zoneChargement.classList.remove("cache");
+  carteMeteo.classList.add("cache");
+  zoneErreur.classList.add("cache");
+}
+
+function afficherCarte(infos) {
+  zoneChargement.classList.add("cache");
+  zoneErreur.classList.add("cache");
+  carteMeteo.classList.remove("cache");
+  afficherMeteo(infos);
+}
+
+function afficherErreur(message) {
+  zoneChargement.classList.add("cache");
+  carteMeteo.classList.add("cache");
+  zoneErreur.classList.remove("cache");
+  msgErreur.textContent = message;
+}
+------------------------------
+
+
+👉 Le CSS du spinner de chargement
+------------------------------
+.spinner {
+  width  : 40px;
+  height : 40px;
+  border : 4px solid #E0E0E0;       /* Fond gris */  
+  border-top-color : #2E75B6;       /* Secteur bleu visible */  
+  border-radius    : 50%;           /* Cercle parfait */  
+  animation        : tourner 0.8s linear infinite;
+  margin : 1rem auto;
+}
+
+@keyframes tourner {
+  to { transform: rotate(360deg); }
+}
+
+.cache { display: none; }
+------------------------------
+
+
+👉 Assembler la fonction principale
+------------------------------
+async function rechercherVille(ville) {
+  if (!ville.trim()) return; // Ignorer les recherches vides
+
+  afficherChargement();     // État 1 : chargement
+
+  try {
+    const url     = construireURL(ville);
+    const reponse = await fetch(url);
+
+    if (!reponse.ok) {
+      if (reponse.status === 404) {
+        throw new Error(`Ville "${ville}" introuvable. Vérifiez l'orthographe.`);
+      }
+      throw new Error(`Erreur ${reponse.status}. Réessayez dans quelques instants.`);
+    }
+
+    const donnees = await reponse.json();
+    const infos   = extraireInfosMeteo(donnees);
+
+    afficherCarte(infos);   // État 2 : succès
+
+  } catch (erreur) {
+    afficherErreur(erreur.message); // État 3 : erreur
+  }
+}
+------------------------------
+
+
+
+✅ 5.8 — Fonctionnalités de recherche & géolocalisation : géocodage, saisie de ville, fond dynamique
+
+
+👉 La structure HTML complète
+
+📃 index.html
+------------------------------
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Météo en temps réel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="conteneur">
+    <h1>Météo en temps réel</h1>
+
+    <!-- Barre de recherche -->
+    <div class="barre-recherche">
+      <input type="text" id="champ-ville"
+             placeholder="Entrez une ville (ex : Lyon, Marseille...)"
+             autocomplete="off">
+      <button id="btn-rechercher">Rechercher</button>
+      <button id="btn-geoloc" title="Utiliser ma position">📍</button>
+    </div>
+
+    <!-- États de l'application -->
+    <div id="zone-chargement" class="cache">
+      <div class="spinner"></div>
+      <p>Récupération de la météo...</p>
+    </div>
+
+    <div id="carte-meteo" class="cache"></div>
+
+    <div id="zone-erreur" class="cache">
+      <p id="message-erreur"></p>
+      <button id="btn-reessayer">Réessayer</button>
+    </div>
+
+    <!-- Historique des recherches -->
+    <div id="historique"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+------------------------------
+
+
+👉 La recherche par saisie clavier
+------------------------------
+const champVille    = document.querySelector("#champ-ville");
+const btnRechercher = document.querySelector("#btn-rechercher");
+const btnGeoloc     = document.querySelector("#btn-geoloc");
+const btnReessayer  = document.querySelector("#btn-reessayer");
+
+// Déclencher la recherche au clic sur le bouton
+btnRechercher.addEventListener("click", () => {
+  const ville = champVille.value.trim();
+  rechercherVille(ville);
+});
+
+// Déclencher la recherche à l'appui sur Entrée
+champVille.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    const ville = champVille.value.trim();
+    rechercherVille(ville);
+  }
+});
+
+// Bouton Réessayer — relancer la dernière recherche
+let dernierVille = "";
+btnReessayer.addEventListener("click", () => {
+  if (dernierVille) rechercherVille(dernierVille);
+});
+------------------------------
+
+
+👉 La géolocalisation avec l’API Geolocation
+------------------------------
+// Obtenir la météo à la position actuelle de l'utilisateur
+btnGeoloc.addEventListener("click", () => {
+  // Vérifier si la géolocalisation est disponible dans ce navigateur
+  if (!navigator.geolocation) {
+    afficherErreur("La géolocalisation n'est pas supportée par votre navigateur.");
+    return;
+  }
+
+  afficherChargement();
+
+  navigator.geolocation.getCurrentPosition(
+    // Callback de succès : position obtenue
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      await rechercherParCoordonnees(latitude, longitude);
+    },
+    // Callback d'erreur : permission refusée ou GPS indisponible
+    (erreur) => {
+      afficherErreur("Impossible d'obtenir votre position. " + erreur.message);
+    }
+  );
+});
+
+// Fonction de recherche par coordonnées GPS
+async function rechercherParCoordonnees(lat, lon) {
+  try {
+    const url = `${CONFIG.URL_BASE}?lat=${lat}&lon=${lon}&appid=${CONFIG.CLE_API}&units=${CONFIG.UNITES}&lang=${CONFIG.LANGUE}`;
+    const reponse = await fetch(url);
+    if (!reponse.ok) throw new Error("Impossible de charger la météo pour votre position.");
+    const donnees = await reponse.json();
+    afficherCarte(extraireInfosMeteo(donnees));
+  } catch (erreur) {
+    afficherErreur(erreur.message);
+  }
+}
+------------------------------
+
+
+👉 L’historique des recherches
+------------------------------
+let historiqueRecherches = [];
+const MAX_HISTORIQUE = 5;
+
+function ajouterAHistorique(ville) {
+  // Supprimer si déjà présente (pour éviter les doublons)
+  historiqueRecherches = historiqueRecherches.filter(
+    v => v.toLowerCase() !== ville.toLowerCase()
+  );
+  // Ajouter en tête de liste
+  historiqueRecherches.unshift(ville);
+  // Limiter à MAX_HISTORIQUE entrées
+  if (historiqueRecherches.length > MAX_HISTORIQUE) {
+    historiqueRecherches.pop();
+  }
+  afficherHistorique();
+}
+
+function afficherHistorique() {
+  const zone = document.querySelector("#historique");
+  if (historiqueRecherches.length === 0) {
+    zone.innerHTML = "";
+    return;
+  }
+  let html = '<p class="titre-historique">Recherches récentes :</p>';
+  historiqueRecherches.forEach(ville => {
+    html += `<button class="btn-historique">${ville}</button>`;
+  });
+  zone.innerHTML = html;
+
+  // Délégation d'événements sur les boutons d'historique
+  zone.addEventListener("click", (e) => {
+    if (e.target.classList.contains("btn-historique")) {
+      champVille.value = e.target.textContent;
+      rechercherVille(e.target.textContent);
+    }
+  });
+}
+------------------------------
+
+
+👉 Le fond dynamique selon les conditions météo
+------------------------------
+// Objet de correspondance : code météo → classe CSS
+const FONDS_METEO = {
+  "01d" : "fond-ensoleille",    // Ciel dégagé — jour
+  "01n" : "fond-nuit",          // Ciel dégagé — nuit
+  "02d" : "fond-nuageux",       // Quelques nuages
+  "02n" : "fond-nuageux-nuit",
+  "03d" : "fond-nuageux",       // Nuageux
+  "04d" : "fond-nuageux",       // Très nuageux
+  "09d" : "fond-pluvieux",      // Averses
+  "10d" : "fond-pluvieux",      // Pluie
+  "10n" : "fond-pluvieux-nuit",
+  "11d" : "fond-orage",         // Orage
+  "13d" : "fond-neige",         // Neige
+  "50d" : "fond-brume",         // Brouillard / brume
+};
+
+function mettreAJourFond(codeIcone) {
+  // Supprimer toutes les classes de fond actuelles
+  const body = document.body;
+  Object.values(FONDS_METEO).forEach(classe => {
+    body.classList.remove(classe);
+  });
+
+  // Appliquer la nouvelle classe
+  const nouvellClasse = FONDS_METEO[codeIcone] || "fond-defaut";
+  body.classList.add(nouvellClasse);
+}
+
+// Appelez mettreAJourFond(donnees.weather[0].icon) dans afficherMeteo()
+------------------------------
+
+📃style.css
+------------------------------
+/* Dans style.css — les dégradés de fond */  
+.fond-ensoleille {
+  background: linear-gradient(135deg, #f9d71c, #f48b29);
+}
+.fond-pluvieux {
+  background: linear-gradient(135deg, #4a6fa5, #6b8cba);
+}
+.fond-neige {
+  background: linear-gradient(135deg, #c8d6e5, #e8f1f8);
+}
+.fond-orage {
+  background: linear-gradient(135deg, #2c3e50, #4a5568);
+}
+.fond-nuageux {
+  background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+}
+.fond-nuit {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+.fond-defaut {
+  background: linear-gradient(135deg, #2c3e50, #2E75B6);
+}
+------------------------------
+
+
+👉 Le code JavaScript final complet
+------------------------------
+// =============================================
+// TABLEAU DE BORD MÉTÉO EN TEMPS RÉEL
+// =============================================
+
+
+// --- Configuration ---
+const CONFIG = {
+  CLE_API  : "REMPLACEZ_PAR_VOTRE_VRAIE_CLE",
+  URL_BASE : "https://api.openweathermap.org/data/2.5/weather",
+  LANGUE   : "fr",
+  UNITES   : "metric"
+};
+
+
+// --- Fonds dynamiques selon la météo ---
+const FONDS_METEO = {
+  "01d":"fond-ensoleille","01n":"fond-nuit",
+  "02d":"fond-nuageux","02n":"fond-nuageux-nuit",
+  "03d":"fond-nuageux","04d":"fond-nuageux",
+  "09d":"fond-pluvieux","10d":"fond-pluvieux","10n":"fond-pluvieux-nuit",
+  "11d":"fond-orage","13d":"fond-neige","50d":"fond-brume"
+};
+
+
+// --- Sélection des éléments DOM ---
+const champVille     = document.querySelector("#champ-ville");
+const btnRechercher  = document.querySelector("#btn-rechercher");
+const btnGeoloc      = document.querySelector("#btn-geoloc");
+const btnReessayer   = document.querySelector("#btn-reessayer");
+const zoneChargement = document.querySelector("#zone-chargement");
+const carteMeteo     = document.querySelector("#carte-meteo");
+const zoneErreur     = document.querySelector("#zone-erreur");
+const msgErreur      = document.querySelector("#message-erreur");
+
+
+// --- État de l'application ---
+let dernierVille           = "";
+let historiqueRecherches   = [];
+const MAX_HISTORIQUE       = 5;
+
+
+// =============================================
+// UTILITAIRES
+// =============================================
+
+
+function construireURL(ville) {
+  return `${CONFIG.URL_BASE}?q=${encodeURIComponent(ville)}&appid=${CONFIG.CLE_API}&units=${CONFIG.UNITES}&lang=${CONFIG.LANGUE}`;
+}
+
+
+function construireURLCoords(lat, lon) {
+  return `${CONFIG.URL_BASE}?lat=${lat}&lon=${lon}&appid=${CONFIG.CLE_API}&units=${CONFIG.UNITES}&lang=${CONFIG.LANGUE}`;
+}
+
+
+function extraireInfosMeteo(donnees) {
+  const { name, sys:{country}, main:{temp,feels_like,humidity,temp_min,temp_max},
+          weather:[{description,icon}], wind:{speed}, visibility } = donnees;
+  return {
+    ville      : `${name}, ${country}`,
+    temperature: Math.round(temp),
+    ressenti   : Math.round(feels_like),
+    humidite   : humidity,
+    tempMin    : Math.round(temp_min),
+    tempMax    : Math.round(temp_max),
+    description: description.charAt(0).toUpperCase() + description.slice(1),
+    icone      : `https://openweathermap.org/img/wn/${icon}@2x.png`,
+    codeIcone  : icon,
+    vent       : (speed * 3.6).toFixed(1),
+    visibilite : (visibility / 1000).toFixed(1)
+  };
+}
+
+
+// =============================================
+// GESTION DES ÉTATS UI
+// =============================================
+
+
+function afficherChargement() {
+  zoneChargement.classList.remove("cache");
+  carteMeteo.classList.add("cache");
+  zoneErreur.classList.add("cache");
+}
+
+
+function afficherCarte(infos) {
+  zoneChargement.classList.add("cache");
+  zoneErreur.classList.add("cache");
+  carteMeteo.classList.remove("cache");
+  afficherMeteo(infos);
+  mettreAJourFond(infos.codeIcone);
+}
+
+
+function afficherErreur(message) {
+  zoneChargement.classList.add("cache");
+  carteMeteo.classList.add("cache");
+  zoneErreur.classList.remove("cache");
+  msgErreur.textContent = message;
+}
+
+
+function mettreAJourFond(codeIcone) {
+  Object.values(FONDS_METEO).forEach(c => document.body.classList.remove(c));
+  document.body.classList.add(FONDS_METEO[codeIcone] || "fond-defaut");
+}
+
+
+// =============================================
+// AFFICHAGE DE LA CARTE MÉTÉO
+// =============================================
+
+
+function afficherMeteo(infos) {
+  carteMeteo.innerHTML = `
+    <div class="entete-meteo">
+      <div class="nom-ville">${infos.ville}</div>
+      <img class="icone-meteo" src="${infos.icone}" alt="${infos.description}">
+    </div>
+    <div class="temperature-principale">
+      ${infos.temperature}<span class="unite">°C</span>
+    </div>
+    <div class="description">${infos.description}</div>
+    <div class="details-meteo">
+      <div class="detail">
+        <span class="label-detail">Ressenti</span>
+        <span class="valeur-detail">${infos.ressenti}°C</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Humidité</span>
+        <span class="valeur-detail">${infos.humidite}%</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Vent</span>
+        <span class="valeur-detail">${infos.vent} km/h</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Visibilité</span>
+        <span class="valeur-detail">${infos.visibilite} km</span>
+      </div>
+      <div class="detail">
+        <span class="label-detail">Min / Max</span>
+        <span class="valeur-detail">${infos.tempMin}° / ${infos.tempMax}°</span>
+      </div>
+    </div>
+  `;
+}
+
+
+// =============================================
+// LOGIQUE DE RECHERCHE
+// =============================================
+
+
+async function rechercherVille(ville) {
+  if (!ville.trim()) return;
+  dernierVille = ville;
+  afficherChargement();
+  try {
+    const reponse = await fetch(construireURL(ville));
+    if (!reponse.ok) {
+      if (reponse.status === 404)
+        throw new Error(`Ville "${ville}" introuvable. Vérifiez l'orthographe.`);
+      throw new Error(`Erreur ${reponse.status}. Réessayez dans quelques instants.`);
+    }
+    const donnees = await reponse.json();
+    const infos   = extraireInfosMeteo(donnees);
+    afficherCarte(infos);
+    ajouterAHistorique(ville);
+  } catch (erreur) {
+    afficherErreur(erreur.message);
+  }
+}
+
+
+async function rechercherParCoordonnees(lat, lon) {
+  afficherChargement();
+  try {
+    const reponse = await fetch(construireURLCoords(lat, lon));
+    if (!reponse.ok) throw new Error("Impossible de charger la météo pour votre position.");
+    const donnees = await reponse.json();
+    afficherCarte(extraireInfosMeteo(donnees));
+  } catch (erreur) {
+    afficherErreur(erreur.message);
+  }
+}
+
+
+// =============================================
+// HISTORIQUE
+// =============================================
+
+
+function ajouterAHistorique(ville) {
+  historiqueRecherches = historiqueRecherches.filter(
+    v => v.toLowerCase() !== ville.toLowerCase()
+  );
+  historiqueRecherches.unshift(ville);
+  if (historiqueRecherches.length > MAX_HISTORIQUE) historiqueRecherches.pop();
+  afficherHistorique();
+}
+
+
+function afficherHistorique() {
+  const zone = document.querySelector("#historique");
+  if (!historiqueRecherches.length) { zone.innerHTML = ""; return; }
+  let html = '<p class="titre-historique">Recherches récentes :</p>';
+  historiqueRecherches.forEach(v => {
+    html += `<button class="btn-historique">${v}</button>`;
+  });
+  zone.innerHTML = html;
+}
+
+
+// =============================================
+// ÉCOUTEURS D'ÉVÉNEMENTS
+// =============================================
+
+
+// Recherche par bouton
+btnRechercher.addEventListener("click", () => {
+  rechercherVille(champVille.value.trim());
+});
+
+// Recherche par touche Entrée
+champVille.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") rechercherVille(champVille.value.trim());
+});
+
+// Bouton Réessayer
+btnReessayer.addEventListener("click", () => {
+  if (dernierVille) rechercherVille(dernierVille);
+});
+
+// Géolocalisation
+btnGeoloc.addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    afficherErreur("Géolocalisation non supportée par votre navigateur.");
+    return;
+  }
+  afficherChargement();
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      await rechercherParCoordonnees(pos.coords.latitude, pos.coords.longitude);
+    },
+    (err) => afficherErreur("Position indisponible : " + err.message)
+  );
+});
+
+// Délégation d'événements sur l'historique
+document.querySelector("#historique").addEventListener("click", (e) => {
+  if (e.target.classList.contains("btn-historique")) {
+    champVille.value = e.target.textContent;
+    rechercherVille(e.target.textContent);
+  }
+});
+
+// Afficher Paris au démarrage pour valider la configuration
+rechercherVille("Paris");
+------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

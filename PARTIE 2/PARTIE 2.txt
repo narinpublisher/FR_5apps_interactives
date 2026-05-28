@@ -1,0 +1,504 @@
+🎯 JavaScript par la pratique  —  Partie 2 : App 1 — Calculateur de pourboire & partage d'addition
+
+✅ JavaScript par la pratique
+Maîtrisez les bases et créez 5 applications interactives
+
+🧠 PARTIE 2  —  App 1 : Calculateur de pourboire & partage d'addition
+Pages 37 – 60
+
+
+🌳 3.1 — Vue d'ensemble du projet & design UI
+
+
+🌸 Structure HTML — le squelette de l'application
+
+Nous allons créer trois fichiers. C'est la structure minimale de toute application web :]
+projet-pourboire/
+├── index.html    ← structure et contenu
+├── style.css     ← apparence visuelle
+└── script.js     ← logique et comportement
+
+
+📃 index.html
+-----------------------------
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur de pourboire</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="carte">
+    <h1>Calculateur de pourboire</h1>
+ 
+    <label>Montant de l'addition (€)</label>
+    <input type="number" id="montant" placeholder="Ex : 48.50" min="0">
+ 
+    <label>Pourboire (%)</label>
+    <div class="boutons-pourboire">
+      <button class="btn-tip" data-tip="10">10 %</button>
+      <button class="btn-tip" data-tip="15">15 %</button>
+      <button class="btn-tip" data-tip="20">20 %</button>
+    </div>
+ 
+    <label>Nombre de personnes</label>
+    <input type="number" id="personnes" placeholder="Ex : 4" min="1">
+ 
+    <div class="resultats">
+      <p>Pourboire par personne : <span id="pourboire-pp">0.00 €</span></p>
+      <p>Total par personne : <span id="total-pp">0.00 €</span></p>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+-----------------------------
+
+
+🌸 Bases du CSS — rendre l'application présentable
+
+📃 style.css
+-----------------------------
+/* style.css */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+ 
+.carte {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 360px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+ 
+h1 {
+  text-align: center;
+  color: #1F3864;
+  margin-bottom: 1.5rem;
+}
+ 
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  color: #333;
+}
+ 
+input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+ 
+.boutons-pourboire {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+ 
+.btn-tip {
+  flex: 1;
+  padding: 0.6rem;
+  border: 2px solid #2E75B6;
+  border-radius: 6px;
+  background: white;
+  color: #2E75B6;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+ 
+.btn-tip.actif {
+  background: #2E75B6;
+  color: white;
+}
+ 
+.resultats {
+  margin-top: 1.5rem;
+  background: #EBF3FB;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+ 
+.resultats span {
+  font-weight: bold;
+  color: #1F3864;
+  font-size: 1.3rem;
+}
+-----------------------------
+
+
+
+🌳 3.2 — Capture des saisies utilisateur
+
+
+🌸 Étape 1 — Sélectionner les éléments
+
+📃 script.js
+-----------------------------
+// script.js
+ 
+// --- Sélection des éléments ---
+const inputMontant   = document.querySelector('#montant');
+const inputPersonnes = document.querySelector('#personnes');
+const btnsTip        = document.querySelectorAll('.btn-tip');
+const spanPourboirePP = document.querySelector('#pourboire-pp');
+const spanTotalPP     = document.querySelector('#total-pp');
+ 
+// Variable d'état : le pourcentage de pourboire sélectionné
+let pourcentageTip = 15; // valeur par défaut
+-----------------------------
+
+
+🌸 Étape 2 — Écouter les clics sur les boutons de pourboire
+-----------------------------
+// --- Gestion des boutons de pourboire ---
+btnsTip.forEach(bouton => {
+  bouton.addEventListener('click', () => {
+ 
+    // Retirer la classe "actif" de tous les boutons
+    btnsTip.forEach(b => b.classList.remove('actif'));
+ 
+    // Ajouter "actif" au bouton cliqué
+    bouton.classList.add('actif');
+ 
+    // Mémoriser le pourcentage choisi (convertir la chaîne en nombre)
+    pourcentageTip = Number(bouton.dataset.tip);
+ 
+    // Recalculer immédiatement
+    calculer();
+  });
+});
+-----------------------------
+
+
+🌸 Étape 3 — Écouter les saisies dans les champs
+-----------------------------
+// --- Écouter les saisies ---
+inputMontant.addEventListener('input', calculer);
+inputPersonnes.addEventListener('input', calculer);
+ 
+// La fonction calculer() sera définie dans la section suivante.
+// Pour l'instant, on branche juste les écouteurs.
+-----------------------------
+
+
+🌳 3.3 — Conversion chaîne vers nombre
+
+
+🌸 Le problème
+-----------------------------
+// Ce que vous pensez avoir :
+const saisie = inputMontant.value; // L'utilisateur a tapé "48.50"
+ 
+// Ce que vous avez réellement :
+console.log(typeof saisie); // "string"  ← pas un nombre !
+ 
+// Le danger de la concaténation au lieu de l'addition :
+console.log(saisie + 10); // "48.5010"  ← concatène, n'additionne pas !
+-----------------------------
+
+
+🌸 Les trois solutions
+-----------------------------
+const saisie = "48.50";
+ 
+// 1. parseInt() — entiers seulement, ignore ce qui suit
+console.log(parseInt(saisie));     // 48  (perd les décimales)
+console.log(parseInt("12abc"));    // 12  (ignore "abc")
+ 
+// 2. parseFloat() — décimaux, ignore ce qui suit
+console.log(parseFloat(saisie));   // 48.5
+console.log(parseFloat("12.5kg")); // 12.5  (ignore "kg")
+ 
+// 3. Number() — conversion stricte
+console.log(Number(saisie));       // 48.5
+console.log(Number("12abc"));      // NaN  (Number est strict)
+console.log(Number(""));           // 0
+-----------------------------
+
+
+🌸 NaN — le piège à connaître
+-----------------------------
+console.log(Number("bonjour")); // NaN
+ 
+// ATTENTION : NaN n'est pas égal à NaN !
+console.log(NaN === NaN); // false
+ 
+// Pour détecter NaN, utilisez toujours isNaN()
+console.log(isNaN(NaN));         // true
+console.log(isNaN(42));          // false
+console.log(isNaN("bonjour"));   // true
+ 
+// Dans notre application, on vérifiera :
+if (isNaN(montant) || montant <= 0) {
+  // Ne pas calculer, afficher une erreur
+}
+-----------------------------
+
+
+
+🌳 3.4 — Calcul et arrondi
+
+🌸 La fonction calculer()
+-----------------------------
+function calculer() {
+  // 1. Lire et convertir les saisies
+  const montant   = parseFloat(inputMontant.value);
+  const personnes = parseInt(inputPersonnes.value);
+ 
+  // 2. Validation : arrêter si les valeurs sont invalides
+  if (isNaN(montant) || montant <= 0 ||
+      isNaN(personnes) || personnes < 1) {
+    spanPourboirePP.textContent = '0.00 €';
+    spanTotalPP.textContent     = '0.00 €';
+    return; // Sortir de la fonction
+  }
+ 
+  // 3. Calcul du pourboire total
+  const pourboire = montant * (pourcentageTip / 100);
+ 
+  // 4. Total addition + pourboire
+  const total = montant + pourboire;
+ 
+  // 5. Division par personne
+  const pourboireParPersonne = pourboire / personnes;
+  const totalParPersonne     = total / personnes;
+ 
+  // 6. Afficher les résultats (voir section 3.5)
+  spanPourboirePP.textContent =
+    pourboireParPersonne.toFixed(2) + ' €';
+  spanTotalPP.textContent =
+    totalParPersonne.toFixed(2) + ' €';
+}
+-----------------------------
+
+
+🌸 Math.round et toFixed()
+-----------------------------
+// Math.round() — arrondit à l'entier le plus proche
+console.log(Math.round(12.6));  // 13
+console.log(Math.round(12.4));  // 12
+ 
+// toFixed(n) — arrondit ET formate avec n décimales
+// Attention : toFixed() renvoie une chaîne, pas un nombre !
+console.log((12.3456).toFixed(2));  // "12.35"
+console.log((10).toFixed(2));       // "10.00"
+ 
+// Dans notre projet, toFixed(2) est parfait :
+// - Affiche toujours 2 décimales (format montant)
+// - Arrondit correctement (0.005 → arrondi supérieur)
+const resultat = (48.5 * 0.15 / 4).toFixed(2);
+console.log(resultat); // "1.82"
+-----------------------------
+
+
+
+🌳 3.5 — Mise à jour du DOM
+
+🌸 textContent vs innerHTML
+-----------------------------
+// textContent — texte pur, sécurisé (recommandé)
+spanPourboirePP.textContent = '2.25 €';
+// Affiche littéralement : 2.25 €
+ 
+// innerHTML — interprète le HTML, moins sécurisé
+spanPourboirePP.innerHTML = '<strong>2.25 €</strong>';
+// Affiche : 2.25 € en gras
+ 
+// DANGER avec innerHTML et données utilisateur :
+const nom = "<img src=x onerror='alert(1)'>";
+element.innerHTML = nom; // ❌ Risque de sécurité (XSS)
+element.textContent = nom; // ✅ Affiche le texte brut, sans interpréter
+-----------------------------
+
+🌸 Mises à jour en temps réel — l'effet magique
+-----------------------------
+// Rappel du branchement complet — tout est lié
+inputMontant.addEventListener('input', calculer);
+inputPersonnes.addEventListener('input', calculer);
+ 
+btnsTip.forEach(bouton => {
+  bouton.addEventListener('click', () => {
+    btnsTip.forEach(b => b.classList.remove('actif'));
+    bouton.classList.add('actif');
+    pourcentageTip = Number(bouton.dataset.tip);
+    calculer(); // ← même fonction appelée
+  });
+});
+ 
+// Activer le bouton 15% par défaut au chargement
+document.querySelector('[data-tip="15"]').classList.add('actif');
+-----------------------------
+
+
+
+🌳 3.6 — Gestion des erreurs & validation
+
+🌸 La validation complète
+-----------------------------
+function calculer() {
+  const montant   = parseFloat(inputMontant.value);
+  const personnes = parseInt(inputPersonnes.value);
+ 
+  // Réinitialiser l'affichage si les données sont invalides
+  if (isNaN(montant) || montant <= 0 ||
+      isNaN(personnes) || personnes < 1) {
+    spanPourboirePP.textContent = '0.00 €';
+    spanTotalPP.textContent     = '0.00 €';
+    afficherErreur(!isNaN(montant) || montant > 0);
+    return;
+  }
+ 
+  // Masquer le message d'erreur si tout est bon
+  masquerErreur();
+ 
+  // ... (suite du calcul)
+}
+ 
+// Afficher un message d'erreur dans la page
+function afficherErreur(champValide) {
+  const zone = document.querySelector('#message-erreur');
+  zone.textContent = champValide
+    ? 'Veuillez entrer un nombre de personnes valide (minimum 1).'
+    : 'Veuillez entrer un montant valide et positif.';
+  zone.style.display = 'block';
+}
+ 
+function masquerErreur() {
+  document.querySelector('#message-erreur').style.display = 'none';
+}
+-----------------------------
+
+
+🌸 Ajouter la zone d'erreur dans le HTML
+-----------------------------
+<p id="message-erreur" style="
+  display: none;
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+"></p>
+-----------------------------
+
+
+🌳 3.7 — Peaufinage de l'interface
+
+🌸 Transitions CSS sur les boutons
+-----------------------------
+/* Effet de focus sur les champs */,
+input:focus {
+  outline: none;
+  border-color: #2E75B6;
+  box-shadow: 0 0 0 3px rgba(46, 117, 182, 0.2);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+ 
+/* Effet hover sur les boutons de pourboire */
+.btn-tip:hover {
+  background: #2E75B6;
+  color: white;
+  transform: translateY(-2px);
+}
+ 
+/* Transition douce sur la zone de résultat */
+.resultats span {
+  transition: all 0.3s ease;
+}
+-----------------------------
+
+🌸 Mise en page responsive
+-----------------------------
+/* Adaptation mobile */
+@media (max-width: 480px) {
+  .carte {
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    padding: 1.5rem;
+  }
+ 
+  .boutons-pourboire {
+    flex-direction: column; /* Boutons empilés sur petits écrans */
+  }
+}
+-----------------------------
+
+🌸 
+-----------------------------
+// === CALCULATEUR DE POURBOIRE ===
+ 
+// --- Sélection des éléments ---
+const inputMontant    = document.querySelector('#montant');
+const inputPersonnes  = document.querySelector('#personnes');
+const btnsTip         = document.querySelectorAll('.btn-tip');
+const spanPourboirePP = document.querySelector('#pourboire-pp');
+const spanTotalPP     = document.querySelector('#total-pp');
+const msgErreur       = document.querySelector('#message-erreur');
+ 
+// --- État de l'application ---
+let pourcentageTip = 15;
+ 
+// --- Écouteurs d'événements ---
+inputMontant.addEventListener('input', calculer);
+inputPersonnes.addEventListener('input', calculer);
+ 
+btnsTip.forEach(bouton => {
+  bouton.addEventListener('click', () => {
+    btnsTip.forEach(b => b.classList.remove('actif'));
+    bouton.classList.add('actif');
+    pourcentageTip = Number(bouton.dataset.tip);
+    calculer();
+  });
+});
+ 
+// Activer 15% par défaut
+document.querySelector('[data-tip="15"]').classList.add('actif');
+ 
+// --- Fonctions ---
+function calculer() {
+  const montant   = parseFloat(inputMontant.value);
+  const personnes = parseInt(inputPersonnes.value);
+ 
+  if (isNaN(montant) || montant <= 0 ||
+      isNaN(personnes) || personnes < 1) {
+    spanPourboirePP.textContent = '0.00 €';
+    spanTotalPP.textContent     = '0.00 €';
+    if (inputMontant.value || inputPersonnes.value) {
+      msgErreur.textContent =
+        'Veuillez entrer des valeurs valides et positives.';
+      msgErreur.style.display = 'block';
+    }
+    return;
+  }
+ 
+  msgErreur.style.display = 'none';
+ 
+  const pourboire = montant * (pourcentageTip / 100);
+  const total     = montant + pourboire;
+ 
+  spanPourboirePP.textContent =
+    (pourboire / personnes).toFixed(2) + ' €';
+  spanTotalPP.textContent =
+    (total / personnes).toFixed(2) + ' €';
+}
+-----------------------------
+

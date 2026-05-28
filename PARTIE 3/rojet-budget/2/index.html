@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionnaire de budget</title>
+
+  <!-- Le fichier CSS sera ajouté et complété plus tard -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="conteneur">
+
+    <h1>Mon Budget</h1>
+
+    <!-- Formulaire d'ajout -->
+    <div class="formulaire">
+
+      <input
+        type="text"
+        id="intitule"
+        placeholder="Intitulé (ex : courses Carrefour)"
+      >
+
+      <input
+        type="number"
+        id="montant"
+        placeholder="Montant (€)"
+        min="0"
+        step="0.01"
+      >
+
+      <select id="categorie">
+        <option value="Alimentation">Alimentation</option>
+        <option value="Transport">Transport</option>
+        <option value="Loisirs">Loisirs</option>
+        <option value="Logement">Logement</option>
+        <option value="Autre">Autre</option>
+      </select>
+
+      <button id="btn-ajouter">
+        Ajouter
+      </button>
+
+    </div>
+
+    <!-- Barre de filtres -->
+    <div class="filtres">
+
+      <button
+        class="btn-filtre actif"
+        data-cat="Tout"
+      >
+        Tout
+      </button>
+
+      <button
+        class="btn-filtre"
+        data-cat="Alimentation"
+      >
+        Alimentation
+      </button>
+
+      <button
+        class="btn-filtre"
+        data-cat="Transport"
+      >
+        Transport
+      </button>
+
+      <button
+        class="btn-filtre"
+        data-cat="Loisirs"
+      >
+        Loisirs
+      </button>
+
+      <button
+        class="btn-filtre"
+        data-cat="Logement"
+      >
+        Logement
+      </button>
+
+      <button
+        class="btn-filtre"
+        data-cat="Autre"
+      >
+        Autre
+      </button>
+
+    </div>
+
+    <!-- Zone Total -->
+    <div class="total-zone">
+      Total :
+      <span id="total">0.00 €</span>
+    </div>
+
+    <!-- Liste dynamique des dépenses -->
+    <ul id="liste-depenses"></ul>
+
+    <!-- Répartition par catégorie -->
+    <div id="repartition"></div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

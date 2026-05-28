@@ -1,0 +1,347 @@
+JavaScript par la pratique
+Maitrisez les bases et creez 5 applications interactives
+
+
+
+🎯 PARTIE 1  —  Mecaniques essentielles
+
+
+🌳 2.1 — Variables & portee : let, const, var
+
+
+🌸 const — la valeur ne changera pas
+----------------------------------
+// Exemples avec const
+const prenom = 'Marie';
+const age = 28;
+const tva = 0.20;
+
+// Ceci declencherait une erreur :
+prenom = 'Sophie'; // ❌ Impossible de reassigner une const
+----------------------------------
+
+
+🌸 let — la valeur peut evoluer
+----------------------------------
+// Exemples avec let
+let score = 0;
+score = 10; // OK, on peut changer
+score = score + 5; // score vaut maintenant 15
+
+let message = 'Bonjour';
+message = 'Au revoir'; // OK avec let
+----------------------------------
+
+🌸 La portee de bloc — pourquoi c'est important
+----------------------------------
+if (true) {
+  let message = 'Je suis dans le bloc';
+  console.log(message); // 'Je suis dans le bloc'
+}
+
+console.log(message); // ❌ Erreur : message n'est pas defini ici
+----------------------------------
+
+
+
+🌳 2.2 — Fonctions & syntaxe flechee
+
+
+🌸 La declaration de fonction classique
+----------------------------------
+// Declaration d'une fonction
+function saluer(prenom) {
+  return 'Bonjour, ' + prenom + ' !';
+}
+
+// Appel de la fonction
+console.log(saluer('Marie')); // "Bonjour, Marie !"
+console.log(saluer('Lucas')); // "Bonjour, Lucas !"
+----------------------------------
+
+
+🌸 La fonction flechee — la syntaxe moderne
+----------------------------------
+// Meme fonction, ecrite en version flechee
+const saluer = (prenom) => {
+  return 'Bonjour, ' + prenom + ' !';
+};
+
+// Encore plus court si une seule expression :
+const saluer = prenom => 'Bonjour, ' + prenom + ' !';
+----------------------------------
+
+
+🌸 Les callbacks — des fonctions en parametre
+----------------------------------
+// setTimeout attend (millisecondes, fonction_a_executer)
+setTimeout(() => {
+  console.log('3 secondes se sont ecoulees !');
+}, 3000);
+
+// La fonction flechee () => { ... } est le callback
+// Elle sera appelee apres 3000 millisecondes (3 secondes)
+----------------------------------
+
+
+🌸Les closures — une fonction qui se souvient
+----------------------------------
+function creerCompteur() {
+  let compte = 0; // Variable "privee"
+  return () => {
+    compte++;
+    return compte;
+  };
+}
+
+const compter = creerCompteur();
+console.log(compter()); // 1
+console.log(compter()); // 2
+console.log(compter()); // 3
+----------------------------------
+
+
+
+🌳 2.3 — Tableaux & objets : stocker et organiser les donnees
+
+
+🌸 Les tableaux — des listes ordonnees
+----------------------------------
+// Creer un tableau
+const fruits = ['pomme', 'banane', 'cerise'];
+
+// Acceder a un element (index commence a 0)
+console.log(fruits[0]); // "pomme"
+console.log(fruits[2]); // "cerise"
+
+// Connaitre la longueur du tableau
+console.log(fruits.length); // 3
+----------------------------------
+
+🌸 Operations CRUD sur un tableau
+----------------------------------
+let courses = ['pain', 'lait'];
+
+// Ajouter a la fin (Create)
+courses.push('fromage');
+// courses = ['pain', 'lait', 'fromage']
+
+// Modifier un element (Update)
+courses[1] = 'yaourt';
+// courses = ['pain', 'yaourt', 'fromage']
+
+// Supprimer le dernier element (Delete)
+courses.pop();
+// courses = ['pain', 'yaourt']
+
+// Supprimer par index avec splice(index, nombre_a_supprimer)
+courses.splice(0, 1);
+// courses = ['yaourt']
+----------------------------------
+
+
+🌸 Les objets — des donnees structurees
+----------------------------------
+// Un objet representant un utilisateur
+const utilisateur = {
+  prenom: 'Claire',
+  age: 31,
+  ville: 'Lyon',
+  estMembre: true
+};
+
+// Acceder a une propriete (deux syntaxes)
+console.log(utilisateur.prenom); // "Claire"
+console.log(utilisateur['ville']); // "Lyon"
+
+// Modifier une propriete
+utilisateur.ville = 'Paris';
+
+// Ajouter une propriete
+utilisateur.email = 'claire@example.com';
+----------------------------------
+
+
+🌸 La destructuration — extraire rapidement des valeurs
+----------------------------------
+// Sans destructuration (ancien style)
+const prenom = utilisateur.prenom;
+const ville = utilisateur.ville;
+
+// Avec destructuration (moderne)
+const { prenom, ville } = utilisateur;
+console.log(prenom); // 'Claire'
+console.log(ville);  // 'Paris'
+
+// Destructuration d'un tableau
+const couleurs = ['rouge', 'vert', 'bleu'];
+const [premiere, deuxieme] = couleurs;
+console.log(premiere); // 'rouge'
+----------------------------------
+
+
+🌸 L'operateur spread — copier et fusionner
+----------------------------------
+// Fusionner deux tableaux
+const fruits = ['pomme', 'poire'];
+const legumes = ['carotte', 'haricot'];
+const alimentation = [...fruits, ...legumes];
+// ['pomme', 'poire', 'carotte', 'haricot']
+
+// Copier un objet en modifiant une propriete
+const utilisateurMisAJour = { ...utilisateur, ville: 'Marseille' };
+// L'original n'est pas modifie
+----------------------------------
+
+
+
+🌳 2.4 — Methodes de tableau : map, filter, reduce, find
+
+
+🌸 map() — transformer chaque element
+----------------------------------
+const prix = [10, 25, 8, 42];
+
+// Appliquer la TVA (20%) a chaque prix
+const prixTTC = prix.map(p => p * 1.20);
+// [12, 30, 9.6, 50.4]
+
+// Exemple avec objets
+const produits = [
+  { nom: 'Cahier', prix: 3.50 },
+  { nom: 'Stylo', prix: 1.20 }
+];
+const noms = produits.map(p => p.nom);
+// ['Cahier', 'Stylo']
+----------------------------------
+
+
+🌸 filter() — garder seulement ce qui correspond
+----------------------------------
+const depenses = [
+  { label: 'Loyer', montant: 850, categorie: 'logement' },
+  { label: 'Restaurant', montant: 45, categorie: 'alimentation' },
+  { label: 'Electricite', montant: 78, categorie: 'logement' }
+];
+
+// Garder seulement les depenses 'logement'
+const logement = depenses.filter(d => d.categorie === 'logement');
+// [{ label: "Loyer"... }, { label: "Electricite"... }]
+
+// Garder les depenses superieures a 50 €
+const grosses = depenses.filter(d => d.montant > 50);
+----------------------------------
+
+
+🌸 reduce() — calculer un total a partir d'un tableau
+----------------------------------
+// Calculer la somme d'un tableau de nombres
+const notes = [14, 17, 12, 19];
+
+const total = notes.reduce((accumulateur, noteActuelle) => {
+  return accumulateur + noteActuelle;
+}, 0); // 0 est la valeur de depart
+
+console.log(total); // 62
+console.log(total / notes.length); // 15.5 (la moyenne)
+
+// Version courte avec retour implicite
+const somme = notes.reduce((acc, n) => acc + n, 0);
+----------------------------------
+
+
+🌸 find() — trouver le premier element correspondant
+----------------------------------
+const utilisateurs = [
+  { id: 1, nom: 'Alice' },
+  { id: 2, nom: 'Bob' },
+  { id: 3, nom: 'Claire' }
+];
+
+const utilisateur = utilisateurs.find(u => u.id === 2);
+console.log(utilisateur); // { id: 2, nom: 'Bob' }
+----------------------------------
+
+
+
+🌳 2.5 — Le DOM : la passerelle entre JavaScript et la page web
+
+
+🌸 Selectionner des elements HTML
+----------------------------------
+// index.html (extrait)
+<h1 id="titre">Bonjour !</h1>
+<p class="message">Un texte ici</p>
+<button id="monBouton">Cliquez</button>
+----------------------------------
+
+----------------------------------
+// script.js
+
+// Par ID (renvoie un seul element)
+const titre = document.getElementById('titre');
+
+// Par selecteur CSS (le plus polyvalent)
+const bouton = document.querySelector('#monBouton'); // par ID
+const msg = document.querySelector('.message'); // par classe
+const para = document.querySelector('p'); // par balise
+
+// Plusieurs elements a la fois
+const tousLesBoutons = document.querySelectorAll('button');
+----------------------------------
+
+
+🌸 Les ecouteurs d'evenements — reagir aux actions
+----------------------------------
+const bouton = document.querySelector('#monBouton');
+
+// Ecouter un clic
+bouton.addEventListener('click', () => {
+  console.log('Le bouton a ete clique !');
+});
+
+// Ecouter la saisie dans un champ texte
+const champ = document.querySelector('#champTexte');
+champ.addEventListener('input', (evenement) => {
+  console.log(evenement.target.value); // Le texte saisi
+});
+----------------------------------
+
+
+🌸 Modifier le DOM — mise a jour de l'interface
+----------------------------------
+const titre = document.querySelector('#titre');
+
+// Modifier le texte (recommande — securise)
+titre.textContent = 'Bienvenue, Marie !';
+
+// Modifier le HTML interne (attention aux injections)
+titre.innerHTML = '<strong>Bienvenue</strong>, Marie !';
+
+// Modifier le style directement
+titre.style.color = 'blue';
+titre.style.fontSize = '2rem';
+
+// Ajouter / retirer une classe CSS
+titre.classList.add('actif');
+titre.classList.remove('cache');
+titre.classList.toggle('surligne'); // Ajoute si absent, retire si present
+----------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

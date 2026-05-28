@@ -1,0 +1,182 @@
+/* === BASE GÉNÉRALE === */
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* === CARTE PRINCIPALE === */
+
+.carte {
+  background: white;
+
+  width: 360px;
+  padding: 2rem;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* === TITRE === */
+
+h1 {
+  text-align: center;
+
+  color: #1F3864;
+
+  margin-bottom: 1.5rem;
+}
+
+/* === LABELS === */
+
+label {
+  display: block;
+
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+
+  font-weight: bold;
+  color: #333;
+}
+
+/* === CHAMPS INPUT === */
+
+input {
+  width: 100%;
+
+  padding: 0.6rem;
+
+  border: 1px solid #ccc;
+  border-radius: 6px;
+
+  font-size: 1rem;
+
+  box-sizing: border-box;
+}
+
+/* Effet focus */
+input:focus {
+  outline: none;
+
+  border-color: #2E75B6;
+
+  box-shadow:
+    0 0 0 3px rgba(46, 117, 182, 0.2);
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+/* === BOUTONS === */
+
+.boutons-pourboire {
+  display: flex;
+
+  gap: 0.5rem;
+
+  margin-top: 0.4rem;
+}
+
+.btn-tip {
+  flex: 1;
+
+  padding: 0.6rem;
+
+  border: 2px solid #2E75B6;
+  border-radius: 6px;
+
+  background: white;
+  color: #2E75B6;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+}
+
+/* Hover */
+.btn-tip:hover {
+  background: #2E75B6;
+  color: white;
+
+  transform: translateY(-2px);
+}
+
+/* Bouton actif */
+.btn-tip.actif {
+  background: #2E75B6;
+  color: white;
+}
+
+/* === MESSAGE D'ERREUR === */
+
+#message-erreur {
+  display: none;
+
+  color: #c0392b;
+  background: #fdecea;
+
+  border-radius: 6px;
+
+  padding: 0.5rem;
+
+  margin-top: 0.8rem;
+
+  font-size: 0.9rem;
+}
+
+/* === ZONE DE RÉSULTATS === */
+
+.resultats {
+  margin-top: 1.5rem;
+
+  background: #EBF3FB;
+
+  border-radius: 8px;
+
+  padding: 1rem;
+
+  text-align: center;
+
+  font-size: 1.1rem;
+}
+
+.resultats span {
+  font-weight: bold;
+
+  color: #1F3864;
+
+  font-size: 1.3rem;
+
+  transition: all 0.3s ease;
+}
+
+/* === RESPONSIVE MOBILE === */
+
+@media (max-width: 480px) {
+
+  .carte {
+    width: 100%;
+
+    min-height: 100vh;
+
+    border-radius: 0;
+
+    padding: 1.5rem;
+  }
+
+  .boutons-pourboire {
+    flex-direction: column;
+  }
+}

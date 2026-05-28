@@ -1,0 +1,328 @@
+/* ===================================================
+   RESET
+=================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* ===================================================
+   BASE
+=================================================== */
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f3f4f7;
+  color: #222;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.header p {
+  color: #666;
+}
+
+/* ===================================================
+   TABLEAU
+=================================================== */
+
+.tableau {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ===================================================
+   COLONNES
+=================================================== */
+
+.colonne {
+  background: #e9ecf1;
+  border-radius: 12px;
+  padding: 14px;
+  width: 320px;
+  min-height: 500px;
+
+  transition: background 0.2s;
+}
+
+.colonne-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 14px;
+}
+
+.colonne-titre {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.colonne-compteur {
+  background: #d6dae2;
+  color: #444;
+
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+/* ===================================================
+   LISTE CARTES
+=================================================== */
+
+.liste-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  min-height: 80px;
+  border-radius: 8px;
+
+  transition: background 0.2s;
+}
+
+/* ===================================================
+   CARTES
+=================================================== */
+
+.carte {
+  background: white;
+  border-radius: 10px;
+
+  padding: 14px;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+
+  cursor: grab;
+
+  animation: carte-apparition 0.2s ease;
+}
+
+.carte-titre {
+  font-weight: bold;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.carte-desc {
+  color: #555;
+  font-size: 0.92rem;
+  line-height: 1.5;
+
+  margin-bottom: 14px;
+}
+
+.carte-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===================================================
+   PRIORITÉS
+=================================================== */
+
+.priorite-basse {
+  border-left: 4px solid #2ecc71;
+}
+
+.priorite-moyenne {
+  border-left: 4px solid #f39c12;
+}
+
+.priorite-haute {
+  border-left: 4px solid #ff4d4f;
+}
+
+.badge-prio {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  background: #ececec;
+}
+
+.prio-basse {
+  background: #dff5e7;
+}
+
+.prio-moyenne {
+  background: #fff0d8;
+}
+
+.prio-haute {
+  background: #ffdfe0;
+}
+
+/* ===================================================
+   BOUTONS
+=================================================== */
+
+.btn-ajouter {
+  width: 100%;
+
+  margin-top: 14px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #dce1ea;
+  color: #222;
+
+  padding: 10px;
+
+  cursor: pointer;
+
+  transition: background 0.2s;
+}
+
+.btn-ajouter:hover {
+  background: #cfd6e2;
+}
+
+.btn-supprimer {
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
+
+  color: #666;
+
+  font-size: 1rem;
+}
+
+.btn-supprimer:hover {
+  color: #000;
+}
+
+/* ===================================================
+   FORMULAIRE AJOUT
+=================================================== */
+
+.form-ajout {
+  margin-top: 14px;
+
+  background: white;
+
+  border-radius: 10px;
+
+  padding: 12px;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.input-titre {
+  width: 100%;
+
+  resize: vertical;
+
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+
+  padding: 10px;
+
+  margin-bottom: 10px;
+}
+
+.input-titre.erreur {
+  border-color: #ff4d4f;
+}
+
+.select-priorite {
+  width: 100%;
+
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+
+  padding: 10px;
+
+  margin-bottom: 12px;
+
+  background: white;
+}
+
+.form-boutons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-primaire,
+.btn-secondaire {
+  flex: 1;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 10px;
+
+  cursor: pointer;
+}
+
+.btn-primaire {
+  background: #4a90d9;
+  color: white;
+}
+
+.btn-primaire:hover {
+  background: #3d7fc2;
+}
+
+.btn-secondaire {
+  background: #e6e6e6;
+}
+
+.btn-secondaire:hover {
+  background: #d7d7d7;
+}
+
+/* ===================================================
+   DRAG AND DROP
+=================================================== */
+
+.carte.en-deplacement {
+  opacity: 0.4;
+  transform: rotate(2deg);
+  cursor: grabbing;
+}
+
+.colonne.depot-actif {
+  background: #dce8f8;
+
+  outline: 2px dashed #4a90d9;
+  outline-offset: -4px;
+}
+
+/* ===================================================
+   ANIMATIONS
+=================================================== */
+
+@keyframes carte-apparition {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

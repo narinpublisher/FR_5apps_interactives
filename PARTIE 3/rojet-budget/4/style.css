@@ -1,0 +1,168 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #F4F6F9;
+  margin: 0;
+  padding: 2rem;
+}
+
+.conteneur {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+h1 {
+  text-align: center;
+  color: #1F3864;
+}
+
+.formulaire {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.formulaire input,
+.formulaire select,
+.formulaire button {
+  padding: 0.6rem;
+  font-size: 1rem;
+}
+
+.formulaire button {
+  background: #2E75B6;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-filtre {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #CCC;
+  background: white;
+  cursor: pointer;
+}
+
+.btn-filtre.actif {
+  background: #2E75B6;
+  color: white;
+}
+
+.total-zone {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+#liste-depenses {
+  list-style: none;
+  padding: 0;
+}
+
+.item-depense {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  border-bottom: 1px solid #DDD;
+}
+
+.info-depense {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.badge-alimentation {
+  background: #4CAF50;
+}
+
+.badge-transport {
+  background: #2196F3;
+}
+
+.badge-loisirs {
+  background: #FF9800;
+}
+
+.badge-logement {
+  background: #9C27B0;
+}
+
+.badge-autre {
+  background: #607D8B;
+}
+
+.droite {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-suppr {
+  background: crimson;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+}
+
+/* Répartition */
+
+#repartition {
+  margin-top: 2rem;
+}
+
+#repartition h2 {
+  font-size: 1rem;
+  color: #1F3864;
+  margin-bottom: 0.8rem;
+}
+
+.ligne-categorie {
+  margin-bottom: 0.8rem;
+}
+
+.label-cat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.nom-cat {
+  font-weight: bold;
+  color: #333;
+}
+
+.montant-cat {
+  color: #666;
+}
+
+.barre-fond {
+  background: #E0E0E0;
+  border-radius: 4px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.barre-remplie {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}

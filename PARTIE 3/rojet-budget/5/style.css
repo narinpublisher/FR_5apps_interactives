@@ -1,0 +1,262 @@
+/* === style.css — Gestionnaire de budget === */
+
+/* Fond général */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  margin: 0;
+}
+
+/* Carte principale */
+.conteneur {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 520px;
+  max-width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+  text-align: center;
+  color: #1F3864;
+  margin-bottom: 1.5rem;
+}
+
+/* Formulaire */
+.formulaire {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.formulaire input,
+.formulaire select {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.formulaire input:first-child,
+.formulaire select {
+  grid-column: 1 / -1;
+}
+
+/* Bouton Ajouter */
+#btn-ajouter {
+  grid-column: 1 / -1;
+  padding: 0.7rem;
+  background: #2E75B6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#btn-ajouter:hover {
+  background: #1F3864;
+}
+
+/* Filtres */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.btn-filtre {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #2E75B6;
+  border-radius: 20px;
+  background: white;
+  color: #2E75B6;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-filtre.actif {
+  background: #2E75B6;
+  color: white;
+}
+
+/* Zone total */
+.total-zone {
+  background: #EBF3FB;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+#total {
+  font-weight: bold;
+  color: #1F3864;
+  font-size: 1.3rem;
+}
+
+/* Liste */
+#liste-depenses {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.item-depense {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.item-depense:last-child {
+  border-bottom: none;
+}
+
+.info-depense {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.intitule {
+  font-weight: bold;
+  color: #222;
+}
+
+/* Badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  color: white;
+}
+
+.badge-alimentation {
+  background: #4CAF50;
+}
+
+.badge-transport {
+  background: #2196F3;
+}
+
+.badge-loisirs {
+  background: #FF9800;
+}
+
+.badge-logement {
+  background: #9C27B0;
+}
+
+.badge-autre {
+  background: #607D8B;
+}
+
+/* Partie droite */
+.droite {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.montant {
+  font-weight: bold;
+  color: #1F3864;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* Bouton supprimer */
+.btn-suppr {
+  background: none;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-suppr:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+/* Répartition */
+#repartition {
+  margin-top: 2rem;
+}
+
+#repartition h2 {
+  font-size: 1rem;
+  color: #1F3864;
+  margin-bottom: 0.8rem;
+}
+
+.ligne-categorie {
+  margin-bottom: 0.8rem;
+}
+
+.label-cat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.nom-cat {
+  font-weight: bold;
+  color: #333;
+}
+
+.montant-cat {
+  color: #666;
+}
+
+/* Barres */
+.barre-fond {
+  background: #E0E0E0;
+  border-radius: 4px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.barre-remplie {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Responsive */
+@media (max-width: 580px) {
+
+  .conteneur {
+    padding: 1.2rem;
+  }
+
+  .formulaire {
+    grid-template-columns: 1fr;
+  }
+
+  .formulaire input:first-child,
+  .formulaire select {
+    grid-column: 1;
+  }
+
+}

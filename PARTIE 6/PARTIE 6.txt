@@ -1,0 +1,1100 @@
+✅ 7.1 — Architecture du projet : modèle de colonnes, modèle de cartes, initialisation des données
+
+
+👉  Le modèle de données
+--------------------
+// Structure d’une colonne
+const colonne = {
+  id     : 'col-todo',        // Identifiant unique (utilisé pour le glisser-déposer)
+  titre  : 'À faire',          // Titre affiché dans l’en-tête de la colonne
+  cartes : [],                 // Tableau des cartes contenues dans cette colonne
+};
+
+// Structure d’une carte
+const carte = {
+  id          : 'carte-1',    // Identifiant unique (généré à la création)
+  titre       : 'Rédiger les tests unitaires',
+  description : 'Couvrir les fonctions de validation du formulaire.',  // Optionnel
+  priorite    : 'haute',      // 'haute', 'moyenne', 'basse'
+  dateCreation: '2025-05-12', // Pour un tri éventuel
+};
+--------------------
+
+
+👉  Les données initiales
+--------------------
+const DONNEES_INITIALES = [
+  {
+    id: 'col-todo', titre: 'À faire',
+    cartes: [
+      { id: 'c-1', titre: 'Lire la documentation MDN sur Drag and Drop',
+        description: 'En particulier les événements dragstart, dragover et drop.',
+        priorite: 'haute', dateCreation: '2025-05-01' },
+      { id: 'c-2', titre: 'Configurer l’environnement de développement',
+        description: '', priorite: 'moyenne', dateCreation: '2025-05-02' },
+      { id: 'c-3', titre: 'Concevoir la structure HTML du tableau',
+        description: 'Définir les classes CSS et les identifiants.',
+        priorite: 'basse', dateCreation: '2025-05-03' },
+    ]
+  },
+  {
+    id: 'col-inprogress', titre: 'En cours',
+    cartes: [
+      { id: 'c-4', titre: 'Implémenter la logique de drag and drop',
+        description: 'Gérer les événements et le transfert de données.',
+        priorite: 'haute', dateCreation: '2025-05-04' },
+    ]
+  },
+  {
+    id: 'col-done', titre: 'Terminé',
+    cartes: [
+      { id: 'c-5', titre: 'Définir le modèle de données',
+        description: 'Structure des colonnes et des cartes validée.',
+        priorite: 'basse', dateCreation: '2025-04-28' },
+    ]
+  },
+];
+--------------------
+
+
+👉  La génération d’identifiants uniques
+--------------------
+// Génération d’un ID unique côté client
+function genererID() {
+  return 'carte-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+}
+
+// Exemples de valeurs retournées :
+// 'carte-1715604732891-4217'
+// 'carte-1715604733005-9831'
+// Ces valeurs sont uniques avec une probabilité très élevée pour une application front-end.
+--------------------
+
+
+👉  L’état global de l’application
+--------------------
+// État global — contient toutes les données du tableau
+let etat = {
+  colonnes: [],  // Tableau de colonnes, chacune avec sa liste de cartes
+};
+
+
+// Initialisation : charger depuis localStorage ou utiliser les données initiales
+function initialiserEtat() {
+  const sauvegarde = localStorage.getItem('kanban-etat');
+  if (sauvegarde) {
+    try {
+      etat.colonnes = JSON.parse(sauvegarde);
+    } catch (e) {
+      console.error('Données corrompues — chargement des données initiales.', e);
+      etat.colonnes = structuredClone(DONNEES_INITIALES);
+    }
+  } else {
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+  }
+}
+--------------------
+
+
+
+✅ 7.2 — Construction de l’UI du tableau : colonnes en flex, formulaire de création de carte
+
+
+👉 La structure HTML de base
+--------------------
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban — Gestion de tâches</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Mon Tableau Kanban</h1>
+    <span class="sous-titre">Glissez les cartes pour changer leur statut</span>
+  </header>
+
+
+  <!-- Le tableau est généré ici par JavaScript -->
+  <main id="tableau" class="tableau"></main>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
+--------------------
+
+
+👉 Le CSS du tableau — mise en page Flexbox
+--------------------
+/* style.css — extraits essentiels */
+
+/* Tableau : disposition horizontale des colonnes */
+.tableau {
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  overflow-x: auto;   /* Défilement horizontal si trop de colonnes */
+  min-height: calc(100vh - 80px);
+  align-items: flex-start;  /* Les colonnes commencent en haut */
+}
+
+/* Colonne individuelle */
+.colonne {
+  background: #f1f2f5;
+  border-radius: 12px;
+  width: 300px;
+  min-width: 300px;  /* Empêche le rétrécissement en flex */
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* En-tête de colonne */
+.colonne-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.colonne-titre {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a2e;
+}
+.colonne-compteur {
+  background: #dde1e9;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* Carte */
+.carte {
+  background: white;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  cursor: grab;
+  border-left: 4px solid transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.carte:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+
+/* Couleurs de priorité (bord gauche) */
+.priorite-haute   { border-left-color: #e74c3c; }
+.priorite-moyenne { border-left-color: #f39c12; }
+.priorite-basse   { border-left-color: #2ecc71; }
+--------------------
+
+
+👉 Générer le tableau depuis l’état
+--------------------
+const tableau = document.querySelector('#tableau');
+
+function afficherTableau() {
+  tableau.innerHTML = '';  // On vide tout
+
+  etat.colonnes.forEach(colonne => {
+    const el = creerElementColonne(colonne);
+    tableau.appendChild(el);
+  });
+}
+
+function creerElementColonne(colonne) {
+  const el = document.createElement('div');
+  el.className = 'colonne';
+  el.dataset.colonneId = colonne.id;  // Pour le drag and drop
+
+  // En-tête avec titre et compteur
+  el.innerHTML = `
+    <div class="colonne-header">
+      <span class="colonne-titre">${colonne.titre}</span>
+      <span class="colonne-compteur">${colonne.cartes.length}</span>
+    </div>
+    <div class="liste-cartes" data-colonne-id="${colonne.id}"></div>
+    <button class="btn-ajouter" data-colonne-id="${colonne.id}">
+      + Ajouter une carte
+    </button>
+  `;
+
+  // Ajouter chaque carte dans la liste
+  const listeCartes = el.querySelector('.liste-cartes');
+  colonne.cartes.forEach(carte => {
+    const carteEl = creerElementCarte(carte);
+    listeCartes.appendChild(carteEl);
+  });
+
+  return el;
+}
+
+function creerElementCarte(carte) {
+  const el = document.createElement('div');
+  el.className = `carte priorite-${carte.priorite}`;
+  el.dataset.carteId = carte.id;  // Indispensable pour le drag and drop
+  el.draggable = true;            // Rend l’élément draggable
+
+  el.innerHTML = `
+    <p class="carte-titre">${carte.titre}</p>
+    ${carte.description ? `<p class="carte-description">${carte.description}</p>` : ''}
+    <div class="carte-footer">
+      <span class="badge-priorite priorite-${carte.priorite}">
+        ${carte.priorite.charAt(0).toUpperCase() + carte.priorite.slice(1)}
+      </span>
+      <button class="btn-supprimer" data-carte-id="${carte.id}"
+              data-colonne-id="${trouverColonneDeCarte(carte.id)}">
+        ✕
+      </button>
+    </div>
+  `;
+
+  return el;
+}
+--------------------
+
+
+👉 Le formulaire d’ajout de carte
+--------------------
+// Délégation d’événements sur le tableau pour les boutons d’ajout
+tableau.addEventListener('click', (e) => {
+  const btnAjouter = e.target.closest('.btn-ajouter');
+  if (btnAjouter) {
+    const colonneId = btnAjouter.dataset.colonneId;
+    afficherFormulaireAjout(colonneId);
+  }
+
+  const btnSupprimer = e.target.closest('.btn-supprimer');
+  if (btnSupprimer) {
+    const { carteId, colonneId } = btnSupprimer.dataset;
+    supprimerCarte(carteId, colonneId);
+  }
+});
+
+function afficherFormulaireAjout(colonneId) {
+  // Trouver le bouton + dans la colonne correspondante
+  const colEl = tableau.querySelector(`[data-colonne-id='${colonneId}']`);
+  const btnAjouter = colEl.querySelector('.btn-ajouter');
+
+  // Remplacer le bouton par un formulaire inline
+  btnAjouter.style.display = 'none';
+  const form = document.createElement('div');
+  form.className = 'form-ajout';
+  form.innerHTML = `
+    <textarea class="input-titre" placeholder="Titre de la carte..." rows="2"></textarea>
+    <select class="select-priorite">
+      <option value="basse">Priorité basse</option>
+      <option value="moyenne" selected>Priorité moyenne</option>
+      <option value="haute">Priorité haute</option>
+    </select>
+    <div class="form-boutons">
+      <button class="btn-valider">Ajouter</button>
+      <button class="btn-annuler">Annuler</button>
+    </div>
+  `;
+
+  colEl.appendChild(form);
+  form.querySelector('.input-titre').focus();
+
+  form.querySelector('.btn-valider').addEventListener('click', () => {
+    const titre = form.querySelector('.input-titre').value.trim();
+    const priorite = form.querySelector('.select-priorite').value;
+    if (titre) {
+      ajouterCarte(colonneId, titre, priorite);
+    }
+  });
+
+
+  form.querySelector('.btn-annuler').addEventListener('click', () => {
+    form.remove();
+    btnAjouter.style.display = '';
+  });
+}
+--------------------
+
+
+
+✅ 7.3 — L’API Drag and Drop : événements dragstart, dragover, drop, dataTransfer
+
+
+👉 Le cycle de vie d’un glisser-déposer
+--------------------
+// Séquence d’événements lors d’un glisser-déposer
+
+// 1. dragstart — déclenché sur l’ÉLÉMENT GLISSÉ au début du glissement
+//    -> C’est ici qu’on stocke l’identifiant de la carte dans dataTransfer
+
+// 2. drag — déclenché en continu pendant le glissement (sur l’élément glissé)
+//    -> Rarement utilisé directement
+
+// 3. dragenter — déclenché quand l’élément glissé entre dans une zone de dépôt
+//    -> Utile pour le retour visuel (« zone active »)
+
+// 4. dragover — déclenché en CONTINU au-dessus d’une zone de dépôt
+//    -> OBLIGATOIRE : doit appeler e.preventDefault() pour autoriser le drop
+
+// 5. dragleave — déclenché quand l’élément quitte une zone de dépôt
+//    -> Nettoyer le retour visuel
+
+// 6. drop — déclenché sur la zone de dépôt quand on relâche
+//    -> C’est ici qu’on lit l’identifiant et déplace la carte
+
+// 7. dragend — déclenché sur l’ÉLÉMENT GLISSÉ à la fin (succès ou annulation)
+//    -> Nettoyer les styles appliqués pendant le glissement
+--------------------
+
+
+👉 L’objet dataTransfer
+--------------------
+// Dans dragstart : stocker l’ID de la carte glissée
+element.addEventListener('dragstart', (e) => {
+  e.dataTransfer.setData('text/plain', carte.id);
+  // 'text/plain' est le type MIME standard pour des données textuelles
+  // La valeur peut être n’importe quelle chaîne — ici, l’ID de la carte
+  e.dataTransfer.effectAllowed = 'move';  // Indique l’intention (copie, déplacement)
+});
+
+// Dans drop : récupérer l’ID de la carte
+zoneDepot.addEventListener('drop', (e) => {
+  e.preventDefault();  // Empêche le comportement par défaut du navigateur
+  const carteId = e.dataTransfer.getData('text/plain');
+  // carteId contient maintenant l’identifiant stocké dans dragstart
+  // → Utiliser cet ID pour déplacer la carte dans l’état
+});
+--------------------
+
+
+👉 Implémenter le drag and drop sur le tableau
+--------------------
+// Variable pour mémoriser l’ID de la carte en cours de glissement
+let carteEnCours = null;
+
+// ─── dragstart : mémoriser quelle carte on déplace ───────────────────────
+tableau.addEventListener('dragstart', (e) => {
+  const carteEl = e.target.closest('.carte');
+  if (!carteEl) return;
+
+  carteEnCours = carteEl.dataset.carteId;
+  e.dataTransfer.setData('text/plain', carteEnCours);
+  e.dataTransfer.effectAllowed = 'move';
+
+  // Retour visuel : rendre la carte semi-transparente
+  setTimeout(() => carteEl.classList.add('en-deplacement'), 0);
+  // setTimeout(fn, 0) : différer d’une frame pour que l’aperçu du navigateur
+  // soit capturé AVANT l’application du style
+});
+
+// ─── dragend : nettoyer le style ────────────────────────────
+  const carteEl = e.target.closest('.carte');
+  if (carteEl) carteEl.classList.remove('en-deplacement');
+  carteEnCours = null;
+  // Nettoyer aussi les zones de dépôt actives
+  document.querySelectorAll('.colonne.depot-actif')
+    .forEach(c => c.classList.remove('depot-actif'));
+});
+
+// ─── dragover : autoriser le dépôt (OBLIGATOIRE) ─────────────────────────
+tableau.addEventListener('dragover', (e) => {
+  e.preventDefault();  // Sans cette ligne, drop ne se déclenche JAMAIS
+  e.dataTransfer.dropEffect = 'move';
+
+
+  // Retour visuel : mettre en évidence la colonne survolée
+  const colonneEl = e.target.closest('.colonne');
+  document.querySelectorAll('.colonne.depot-actif')
+    .forEach(c => c.classList.remove('depot-actif'));
+  if (colonneEl) colonneEl.classList.add('depot-actif');
+});
+
+// ─── dragleave : nettoyer le retour visuel ────────────────────────────
+tableau.addEventListener('dragleave', (e) => {
+  // relatedTarget : l’élément vers lequel on se déplace
+  // Si null ou hors du tableau, on nettoie
+  if (!e.relatedTarget || !tableau.contains(e.relatedTarget)) {
+    document.querySelectorAll('.colonne.depot-actif')
+      .forEach(c => c.classList.remove('depot-actif'));
+  }
+});
+--------------------
+
+
+
+✅ 7.4 — Déplacement de cartes entre colonnes : relocalisation de nœuds DOM, retour visuel
+
+
+👉 La règle fondamentale : toujours modifier l’état, puis régénérer
+--------------------
+// ─── drop : déplacer la carte dans l’état et sauvegarder ───────────────
+tableau.addEventListener('drop', (e) => {
+  e.preventDefault();
+
+  const carteId = e.dataTransfer.getData('text/plain');
+  if (!carteId) return;
+
+  // Trouver la colonne de destination
+  const colonneDestEl = e.target.closest('.colonne');
+  if (!colonneDestEl) return;
+  const colonneDestId = colonneDestEl.dataset.colonneId;
+
+  // Trouver la colonne source (celle qui contient la carte)
+  const colonneSource = etat.colonnes.find(
+    col => col.cartes.some(c => c.id === carteId)
+  );
+  if (!colonneSource) return;
+  if (colonneSource.id === colonneDestId) return;  // Même colonne : rien à faire
+
+  // Trouver la carte dans la source
+  const indiceCarte = colonneSource.cartes.findIndex(c => c.id === carteId);
+  const [carte] = colonneSource.cartes.splice(indiceCarte, 1);  // Retirer de la source
+
+  // Insérer dans la destination
+  const colonneDest = etat.colonnes.find(col => col.id === colonneDestId);
+  colonneDest.cartes.push(carte);  // Ajouter à la fin de la colonne destination
+
+  // Nettoyer les styles
+  document.querySelectorAll('.colonne.depot-actif')
+    .forEach(c => c.classList.remove('depot-actif'));
+
+  // Sauvegarder et réafficher
+  sauvegarderEtat();
+  afficherTableau();
+  brancherÉcouteurs();  // Rebrancher les écouteurs sur les nouveaux éléments
+});
+--------------------
+
+
+👉 Fonctions utilitaires pour l’état
+--------------------
+// Trouver la colonne qui contient une carte donnée
+function trouverColonneDeCarte(carteId) {
+  const colonne = etat.colonnes.find(
+    col => col.cartes.some(c => c.id === carteId)
+  );
+  return colonne ? colonne.id : null;
+}
+
+// Ajouter une carte dans une colonne
+function ajouterCarte(colonneId, titre, priorite = 'moyenne', description = '') {
+  const colonne = etat.colonnes.find(c => c.id === colonneId);
+  if (!colonne) return;
+
+  const nouvelleCarte = {
+    id          : genererID(),
+    titre,
+    description,
+    priorite,
+    dateCreation: new Date().toISOString().split('T')[0],
+  };
+  colonne.cartes.push(nouvelleCarte);
+  sauvegarderEtat();
+  afficherTableau();
+  brancherEcouteurs();
+}
+
+// Supprimer une carte d’une colonne
+function supprimerCarte(carteId, colonneId) {
+  const colonne = etat.colonnes.find(c => c.id === colonneId);
+  if (!colonne) return;
+
+  const index = colonne.cartes.findIndex(c => c.id === carteId);
+  if (index === -1) return;
+
+  const confirme = confirm(`Supprimer la carte « ${colonne.cartes[index].titre} » ?`);
+  if (!confirme) return;
+
+  colonne.cartes.splice(index, 1);
+  sauvegarderEtat();
+  afficherTableau();
+  brancherEcouteurs();
+}
+--------------------
+
+
+👉 Retour visuel pendant le glissement
+--------------------
+/* Carte en cours de déplacement : semi-transparente */
+.carte.en-deplacement {
+  opacity: 0.4;
+  transform: rotate(2deg);
+  cursor: grabbing;
+}
+
+/* Colonne de dépôt active : mise en évidence */
+.colonne.depot-actif {
+  background: #dce8f8;
+  outline: 2px dashed #4a90d9;
+  outline-offset: -4px;
+}
+
+/* Zone de liste de cartes : zone de dépôt visible */
+.liste-cartes {
+  min-height: 80px;   /* Permet le dépôt dans une colonne vide */
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+/* Animation d’apparition d’une nouvelle carte */
+@keyframes carte-apparition {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.carte { animation: carte-apparition 0.2s ease; }
+--------------------
+
+
+
+✅ 7.5 — Fondamentaux du LocalStorage : JSON.stringify/parse, quand lire/écrire
+
+
+👉 Qu’est-ce que localStorage ?
+--------------------
+// API localStorage — quatre méthodes essentielles
+
+// Écrire (créer ou remplacer)
+localStorage.setItem('ma-cle', 'ma-valeur');
+
+// Lire
+const valeur = localStorage.getItem('ma-cle');  // → 'ma-valeur'
+// Si la clé n’existe pas, retourne null
+
+// Supprimer une entrée
+localStorage.removeItem('ma-cle');
+
+// Tout effacer (ATTENTION : supprime TOUT le localStorage de ce domaine)
+localStorage.clear();
+
+// Vérifier l’existence
+if (localStorage.getItem('ma-cle') !== null) {
+  console.log('La clé existe');
+}
+--------------------
+
+
+👉 La contrainte fondamentale : localStorage ne stocke que des chaînes
+--------------------
+// ❌ MAUVAISE approche — ne fonctionne pas
+const utilisateur = { nom: 'Alice', score: 42 };
+localStorage.setItem('utilisateur', utilisateur);
+console.log(localStorage.getItem('utilisateur')); // '[object Object]' ← données perdues
+
+// ✅ BONNE approche — JSON.stringify avant d’écrire
+localStorage.setItem('utilisateur', JSON.stringify(utilisateur));
+// Stocké : '{"nom":"Alice","score":42}'
+
+// ✅ BONNE approche — JSON.parse pour lire
+const donnees = JSON.parse(localStorage.getItem('utilisateur'));
+console.log(donnees.nom);   // 'Alice'
+console.log(donnees.score); // 42 (nombre, pas chaîne)
+--------------------
+
+
+👉 Quand lire et quand écrire ?
+--------------------
+// Lire : une seule fois, au démarrage de l’application
+function chargerEtat() {
+  const sauvegarde = localStorage.getItem('kanban-etat');
+  if (sauvegarde !== null) {
+    try {
+      etat.colonnes = JSON.parse(sauvegarde);
+      return true;  // Chargement réussi
+    } catch (erreur) {
+      // JSON corrompu (rare mais possible)
+      console.error('Erreur de chargement localStorage :', erreur);
+      localStorage.removeItem('kanban-etat');  // Nettoyer la donnée corrompue
+      return false;
+    }
+  }
+  return false;  // Pas de sauvegarde trouvée
+}
+
+// Écrire : après chaque modification de l’état
+function sauvegarderEtat() {
+  try {
+    localStorage.setItem('kanban-etat', JSON.stringify(etat.colonnes));
+  } catch (erreur) {
+    // Cas rare : quota dépassé (localStorage limité à ~5 Mo par domaine)
+    console.error('Erreur de sauvegarde localStorage :', erreur);
+  }
+}
+
+// Initialisation au démarrage
+if (!chargerEtat()) {
+  etat.colonnes = structuredClone(DONNEES_INITIALES);
+  sauvegarderEtat();
+}
+--------------------
+
+
+👉 Les limitations de localStorage
+--------------------
+// Ce que localStorage peut faire :
+// ✅ Stocker des préférences utilisateur (thème, langue)
+// ✅ Sauvegarder l’état d’une application légère (notre tableau Kanban)
+// ✅ Conserver des données de session simples (panier, formulaire en cours)
+
+// Ce que localStorage NE PEUT PAS faire :
+// ❌ Stocker des données sensibles (mots de passe, tokens de session)
+// ❌ Partager des données entre utilisateurs ou navigateurs
+// ❌ Synchroniser entre appareils
+// ❌ Stocker plus de ~5 Mo de données (quota par domaine)
+// ❌ Être utilisé dans les Web Workers (utiliser IndexedDB à la place)
+
+// Alternatives pour des besoins plus avancés :
+// IndexedDB   : base de données dans le navigateur, supporte les transactions
+// sessionStorage : comme localStorage, mais effacé à la fermeture de l’onglet
+// Cookies     : partagés avec le serveur, expirent, utiles pour l’authentification
+--------------------
+
+
+
+✅ 7.6 — Persistance de l’état du tableau : sérialisation, hydratation au chargement
+
+
+👉 Sérialisation et désérialisation — la paire fondamentale
+--------------------
+// ─── Sérialisation : état → JSON string → localStorage ──────────────────
+function sauvegarderEtat() {
+  // JSON.stringify() convertit le tableau de colonnes en chaîne JSON
+  const json = JSON.stringify(etat.colonnes);
+
+  // localStorage.setItem() stocke cette chaîne
+  localStorage.setItem('kanban-etat', json);
+
+  // Pour déboguer : voir exactement ce qui est sauvegardé
+  // console.log('Sauvegardé :', json);
+}
+
+// ─── Hydratation : localStorage → JSON string → état ───────────────────
+function hydratertEtat() {
+  const json = localStorage.getItem('kanban-etat');
+
+  if (json === null) {
+    // Première visite : charger les données initiales
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+    sauvegarderEtat();  // Initialiser localStorage dès la première visite
+    return;
+  }
+
+  try {
+    etat.colonnes = JSON.parse(json);
+  } catch (e) {
+    console.warn('Sauvegarde corrompue — réinitialisation.', e);
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+    sauvegarderEtat();
+  }
+}
+--------------------
+
+
+👉 La séquence de démarrage
+--------------------
+// Séquence correcte de démarrage de l’application
+// 1. Hydrater l’état depuis localStorage (ou charger les données initiales)
+// 2. Afficher le tableau depuis l’état
+// 3. Brancher les écouteurs d’événements
+
+function demarrerApplication() {
+  hydratertEtat();      // 1. Charger les données
+  afficherTableau();    // 2. Générer l’interface
+  brancherEcouteurs();  // 3. Activer les interactions
+}
+
+// Lancer au chargement complet du DOM
+document.addEventListener('DOMContentLoaded', demarrerApplication);
+
+// --- Pourquoi DOMContentLoaded et pas juste l’appel direct ?
+// Si le script est dans <head> ou si la page est complexe, le DOM peut ne pas
+// encore exister au moment où le script s’exécute. DOMContentLoaded garantit
+// que tout le HTML est parsé avant d’exécuter notre code.
+// Alternativement, placer le script à la fin de <body> (avant </body>) garantit
+// aussi que le DOM est prêt — c’est ce que nous faisons dans notre HTML.
+--------------------
+
+
+👉 Gérer les conflits de version de données
+--------------------
+// Validation légère de la structure chargée
+function estEtatValide(colonnes) {
+  if (!Array.isArray(colonnes)) return false;
+  return colonnes.every(col => (
+    col.id && col.titre && Array.isArray(col.cartes)
+  ));
+}
+
+function hydratertEtat() {
+  const json = localStorage.getItem('kanban-etat');
+  if (json === null) {
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+    sauvegarderEtat();
+    return;
+  }
+
+  try {
+    const donnees = JSON.parse(json);
+    if (!estEtatValide(donnees)) {
+      throw new Error('Structure de données invalide');
+    }
+    etat.colonnes = donnees;
+  } catch (e) {
+    console.warn('Réinitialisation de l’état :', e.message);
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+    sauvegarderEtat();
+  }
+}
+--------------------
+
+
+
+✅ 7.7 — Ajout et suppression de cartes : création dynamique, confirmation avant suppression
+
+
+👉 La fonction brancherEcouteurs() — le chef d’orchestre
+--------------------
+function brancherEcouteurs() {
+  // ─── Drag and drop sur les cartes ──────────────
+  tableau.addEventListener('dragstart', gestionnaireDragStart);
+  tableau.addEventListener('dragend',   gestionnaireDragEnd);
+  tableau.addEventListener('dragover',  gestionnaireDragOver);
+  tableau.addEventListener('dragleave', gestionnaireDragLeave);
+  tableau.addEventListener('drop',      gestionnaireDrop);
+
+  // ─── Boutons d’ajout et de suppression (délégation) ─────
+  // On retire d’abord l’ancien écouteur avant d’en ajouter un nouveau
+  tableau.removeEventListener('click', gestionnaireClicTableau);
+  tableau.addEventListener('click', gestionnaireClicTableau);
+}
+
+function gestionnaireClicTableau(e) {
+  const btnAjouter = e.target.closest('.btn-ajouter');
+  if (btnAjouter) {
+    afficherFormulaireAjout(btnAjouter.dataset.colonneId);
+    return;
+  }
+
+  const btnSupprimer = e.target.closest('.btn-supprimer');
+  if (btnSupprimer) {
+    supprimerCarte(
+      btnSupprimer.dataset.carteId,
+      btnSupprimer.dataset.colonneId
+    );
+  }
+}
+--------------------
+
+
+👉 Ajouter une carte avec validation
+--------------------
+function afficherFormulaireAjout(colonneId) {
+  const colEl = tableau.querySelector(`[data-colonne-id='${colonneId}']`);
+  if (!colEl) return;
+
+  // Fermer tout formulaire déjà ouvert
+  const formExistant = tableau.querySelector('.form-ajout');
+  if (formExistant) formExistant.remove();
+
+  const btnAjouter = colEl.querySelector('.btn-ajouter');
+  btnAjouter.style.display = 'none';
+
+  const form = document.createElement('div');
+  form.className = 'form-ajout';
+  form.innerHTML = `
+    <textarea class="input-titre"
+              placeholder="Titre de la carte…" rows="2"></textarea>
+    <select class="select-priorite">
+      <option value="basse">● Priorité basse</option>
+      <option value="moyenne" selected>● Priorité moyenne</option>
+      <option value="haute">● Priorité haute</option>
+    </select>
+    <div class="form-boutons">
+      <button class="btn-valider btn-primaire">Ajouter</button>
+      <button class="btn-annuler btn-secondaire">Annuler</button>
+    </div>
+  `;
+
+  colEl.appendChild(form);
+  const inputTitre = form.querySelector('.input-titre');
+  inputTitre.focus();
+
+  function valider() {
+    const titre = inputTitre.value.trim();
+    if (!titre) {
+      inputTitre.classList.add('erreur');
+      inputTitre.placeholder = 'Le titre ne peut pas être vide.';
+      return;
+    }
+    const priorite = form.querySelector('.select-priorite').value;
+    ajouterCarte(colonneId, titre, priorite);
+    // afficherTableau() est appelé dans ajouterCarte(), ce qui supprime le formulaire
+  }
+
+  function annuler() {
+    form.remove();
+    btnAjouter.style.display = '';
+  }
+
+  form.querySelector('.btn-valider').addEventListener('click', valider);
+  form.querySelector('.btn-annuler').addEventListener('click', annuler);
+
+
+  // Raccourci clavier : Entrée pour valider, Échap pour annuler
+  inputTitre.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); valider(); }
+    if (e.key === 'Escape') annuler();
+  });
+}
+--------------------
+
+
+👉 Supprimer une carte avec confirmation
+--------------------
+function supprimerCarte(carteId, colonneId) {
+  const colonne = etat.colonnes.find(c => c.id === colonneId);
+  if (!colonne) return;
+
+  const index = colonne.cartes.findIndex(c => c.id === carteId);
+  if (index === -1) return;
+
+  const titreCarte = colonne.cartes[index].titre;
+
+  // Confirmation avant suppression définitive
+  // confirm() est synchrone et bloque l’exécution jusqu’à la réponse
+  const confirme = confirm(
+    `Êtes-vous sûr de vouloir supprimer la carte : « ${titreCarte} » ?`
+  );
+  if (!confirme) return;
+
+  // Modifier l’état
+  colonne.cartes.splice(index, 1);
+
+  // Sauvegarder et réafficher
+  sauvegarderEtat();
+  afficherTableau();
+  brancherEcouteurs();
+}
+--------------------
+
+
+👉 Le code JavaScript complet
+--------------------
+// ===================================================
+// KANBAN — GESTION DE TÂCHES AVEC PERSISTANCE
+// ===================================================
+
+// --- Données initiales ---
+const DONNEES_INITIALES = [
+  { id: 'col-todo', titre: 'À faire', cartes: [
+    { id: 'c-1', titre: 'Lire la doc MDN sur Drag and Drop',
+      description: 'Événements dragstart, dragover, drop.',
+      priorite: 'haute', dateCreation: '2025-05-01' },
+    { id: 'c-2', titre: 'Configurer l’environnement',
+      description: '', priorite: 'moyenne', dateCreation: '2025-05-02' },
+    { id: 'c-3', titre: 'Concevoir la structure HTML',
+      description: 'Classes CSS et identifiants.',
+      priorite: 'basse', dateCreation: '2025-05-03' },
+  ]},
+  { id: 'col-inprogress', titre: 'En cours', cartes: [
+    { id: 'c-4', titre: 'Implémenter le drag and drop',
+      description: 'Gérer les événements et dataTransfer.',
+      priorite: 'haute', dateCreation: '2025-05-04' },
+  ]},
+  { id: 'col-done', titre: 'Terminé', cartes: [
+    { id: 'c-5', titre: 'Définir le modèle de données',
+      description: 'Structure colonnes/cartes validée.',
+      priorite: 'basse', dateCreation: '2025-04-28' },
+  ]},
+];
+--------------------
+
+--------------------
+// --- État global ---
+let etat = { colonnes: [] };
+let carteEnCours = null;
+
+// --- Utilitaires ---
+function genererID() {
+  return 'carte-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+}
+
+function trouverColonneDeCarte(carteId) {
+  const col = etat.colonnes.find(c => c.cartes.some(ca => ca.id === carteId));
+  return col ? col.id : null;
+}
+
+function estEtatValide(colonnes) {
+  return Array.isArray(colonnes) &&
+    colonnes.every(c => c.id && c.titre && Array.isArray(c.cartes));
+}
+
+// --- localStorage ---
+function sauvegarderEtat() {
+  try { localStorage.setItem('kanban-etat', JSON.stringify(etat.colonnes)); }
+  catch (e) { console.error('Erreur sauvegarde :', e); }
+}
+
+function hydratertEtat() {
+  const json = localStorage.getItem('kanban-etat');
+  if (json === null) {
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+    sauvegarderEtat(); return;
+  }
+  try {
+    const donnees = JSON.parse(json);
+    if (!estEtatValide(donnees)) throw new Error('Structure invalide');
+    etat.colonnes = donnees;
+  } catch(e) {
+    console.warn('Réinitialisation :', e.message);
+    etat.colonnes = structuredClone(DONNEES_INITIALES);
+    sauvegarderEtat();
+  }
+}
+--------------------
+
+--------------------
+// --- Rendu ---
+const tableau = document.querySelector('#tableau');
+
+function afficherTableau() {
+  tableau.innerHTML = '';
+  etat.colonnes.forEach(col => tableau.appendChild(creerElementColonne(col)));
+}
+
+function creerElementColonne(colonne) {
+  const el = document.createElement('div');
+  el.className = 'colonne';
+  el.dataset.colonneId = colonne.id;
+  el.innerHTML = `
+    <div class="colonne-header">
+      <span class="colonne-titre">${colonne.titre}</span>
+      <span class="colonne-compteur">${colonne.cartes.length}</span>
+    </div>
+    <div class="liste-cartes" data-colonne-id="${colonne.id}"></div>
+    <button class="btn-ajouter" data-colonne-id="${colonne.id}">
+      + Ajouter une carte
+    </button>`;
+  const listeCartes = el.querySelector('.liste-cartes');
+  colonne.cartes.forEach(carte => listeCartes.appendChild(creerElementCarte(carte)));
+  return el;
+}
+
+function creerElementCarte(carte) {
+  const el = document.createElement('div');
+  el.className = `carte priorite-${carte.priorite}`;
+  el.dataset.carteId = carte.id;
+  el.draggable = true;
+  const colonneId = trouverColonneDeCarte(carte.id);
+  el.innerHTML = `
+    <p class="carte-titre">${carte.titre}</p>
+    ${carte.description ? `<p class="carte-desc">${carte.description}</p>` : ''}
+    <div class="carte-footer">
+      <span class="badge-prio prio-${carte.priorite}">${carte.priorite}</span>
+      <button class="btn-supprimer"
+        data-carte-id="${carte.id}"
+        data-colonne-id="${colonneId}">✕</button>
+    </div>`;
+  return el;
+}
+--------------------
+
+--------------------
+// --- Logique CRUD ---
+function ajouterCarte(colonneId, titre, priorite = 'moyenne', desc = '') {
+  const col = etat.colonnes.find(c => c.id === colonneId);
+  if (!col) return;
+  col.cartes.push({ id: genererID(), titre, description: desc, priorite,
+    dateCreation: new Date().toISOString().split('T')[0] });
+  sauvegarderEtat(); afficherTableau(); brancherEcouteurs();
+}
+
+function supprimerCarte(carteId, colonneId) {
+  const col = etat.colonnes.find(c => c.id === colonneId);
+  if (!col) return;
+  const idx = col.cartes.findIndex(c => c.id === carteId);
+  if (idx === -1) return;
+  if (!confirm(`Supprimer « ${col.cartes[idx].titre} » ?`)) return;
+  col.cartes.splice(idx, 1);
+  sauvegarderEtat(); afficherTableau(); brancherEcouteurs();
+}
+
+// --- Drag and drop ---
+function gestionnaireDragStart(e) {
+  const carteEl = e.target.closest('.carte');
+  if (!carteEl) return;
+  carteEnCours = carteEl.dataset.carteId;
+  e.dataTransfer.setData('text/plain', carteEnCours);
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => carteEl.classList.add('en-deplacement'), 0);
+}
+
+function gestionnaireDragEnd(e) {
+  const carteEl = e.target.closest('.carte');
+  if (carteEl) carteEl.classList.remove('en-deplacement');
+  carteEnCours = null;
+  document.querySelectorAll('.depot-actif').forEach(el => el.classList.remove('depot-actif'));
+}
+
+function gestionnaireDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const colEl = e.target.closest('.colonne');
+  document.querySelectorAll('.depot-actif').forEach(el => el.classList.remove('depot-actif'));
+  if (colEl) colEl.classList.add('depot-actif');
+}
+
+function gestionnaireDragLeave(e) {
+  if (!e.relatedTarget || !tableau.contains(e.relatedTarget)) {
+    document.querySelectorAll('.depot-actif').forEach(el => el.classList.remove('depot-actif'));
+  }
+}
+
+function gestionnaireDrop(e) {
+  e.preventDefault();
+  const carteId = e.dataTransfer.getData('text/plain');
+  if (!carteId) return;
+  const colonneDestEl = e.target.closest('.colonne');
+  if (!colonneDestEl) return;
+  const colonneDestId = colonneDestEl.dataset.colonneId;
+  const src = etat.colonnes.find(c => c.cartes.some(ca => ca.id === carteId));
+  if (!src || src.id === colonneDestId) return;
+  const idx = src.cartes.findIndex(c => c.id === carteId);
+  const [carte] = src.cartes.splice(idx, 1);
+  const dest = etat.colonnes.find(c => c.id === colonneDestId);
+  dest.cartes.push(carte);
+  document.querySelectorAll('.depot-actif').forEach(el => el.classList.remove('depot-actif'));
+  sauvegarderEtat(); afficherTableau(); brancherEcouteurs();
+}
+
+function gestionnaireClicTableau(e) {
+  const btnAjouter = e.target.closest('.btn-ajouter');
+  if (btnAjouter) { afficherFormulaireAjout(btnAjouter.dataset.colonneId); return; }
+  const btnSuppr = e.target.closest('.btn-supprimer');
+  if (btnSuppr) supprimerCarte(btnSuppr.dataset.carteId, btnSuppr.dataset.colonneId);
+}
+
+// --- Branchement des écouteurs ---
+function brancherEcouteurs() {
+  tableau.removeEventListener('dragstart', gestionnaireDragStart);
+  tableau.removeEventListener('dragend',   gestionnaireDragEnd);
+  tableau.removeEventListener('dragover',  gestionnaireDragOver);
+  tableau.removeEventListener('dragleave', gestionnaireDragLeave);
+  tableau.removeEventListener('drop',      gestionnaireDrop);
+  tableau.removeEventListener('click',     gestionnaireClicTableau);
+  tableau.addEventListener('dragstart', gestionnaireDragStart);
+  tableau.addEventListener('dragend',   gestionnaireDragEnd);
+  tableau.addEventListener('dragover',  gestionnaireDragOver);
+  tableau.addEventListener('dragleave', gestionnaireDragLeave);
+  tableau.addEventListener('drop',      gestionnaireDrop);
+  tableau.addEventListener('click',     gestionnaireClicTableau);
+}
+
+// --- Démarrage ---
+hydratertEtat();
+afficherTableau();
+brancherEcouteurs();
+--------------------

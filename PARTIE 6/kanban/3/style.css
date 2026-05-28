@@ -1,0 +1,322 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f6fa;
+  color: #1a1a2e;
+}
+
+/* ─────────────────────────
+   Header
+───────────────────────── */
+
+.app-header {
+  padding: 20px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.sous-titre {
+  display: block;
+  margin-top: 6px;
+  color: #666;
+}
+
+/* ─────────────────────────
+   Tableau
+───────────────────────── */
+
+.tableau {
+  display: flex;
+  gap: 16px;
+
+  padding: 24px;
+
+  overflow-x: auto;
+
+  min-height: calc(100vh - 100px);
+
+  align-items: flex-start;
+}
+
+/* ─────────────────────────
+   Colonnes
+───────────────────────── */
+
+.colonne {
+  width: 300px;
+  min-width: 300px;
+
+  background: #f1f2f5;
+
+  border-radius: 12px;
+
+  padding: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+/* Zone active */
+.colonne.depot-actif {
+  background: #dce8f8;
+
+  outline: 2px dashed #4a90d9;
+
+  outline-offset: -4px;
+}
+
+/* ─────────────────────────
+   Header colonne
+───────────────────────── */
+
+.colonne-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.colonne-titre {
+  font-weight: bold;
+}
+
+.colonne-compteur {
+  background: #dde1e9;
+
+  border-radius: 999px;
+
+  padding: 4px 10px;
+
+  font-size: 0.8rem;
+}
+
+/* ─────────────────────────
+   Liste cartes
+───────────────────────── */
+
+.liste-cartes {
+  min-height: 80px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  border-radius: 8px;
+
+  transition: background 0.2s;
+}
+
+/* ─────────────────────────
+   Cartes
+───────────────────────── */
+
+.carte {
+  background: white;
+
+  border-radius: 8px;
+
+  padding: 14px 16px;
+
+  border-left: 4px solid transparent;
+
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+
+  cursor: grab;
+
+  animation: carte-apparition 0.2s ease;
+
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+}
+
+.carte:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Drag en cours */
+.carte.en-deplacement {
+  opacity: 0.4;
+
+  transform: rotate(2deg);
+
+  cursor: grabbing;
+}
+
+.carte-titre {
+  margin: 0 0 8px;
+  font-weight: bold;
+}
+
+.carte-description {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* ─────────────────────────
+   Footer carte
+───────────────────────── */
+
+.carte-footer {
+  margin-top: 12px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ─────────────────────────
+   Priorités
+───────────────────────── */
+
+.badge-priorite {
+  padding: 4px 8px;
+
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+
+  color: white;
+}
+
+.priorite-haute {
+  border-left-color: #e74c3c;
+  background: #e74c3c;
+}
+
+.priorite-moyenne {
+  border-left-color: #f39c12;
+  background: #f39c12;
+}
+
+.priorite-basse {
+  border-left-color: #2ecc71;
+  background: #2ecc71;
+}
+
+/* ─────────────────────────
+   Boutons
+───────────────────────── */
+
+.btn-ajouter,
+.btn-valider,
+.btn-annuler,
+.btn-supprimer {
+  border: none;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+.btn-ajouter {
+  padding: 10px;
+
+  background: white;
+
+  font-weight: bold;
+}
+
+.btn-ajouter:hover {
+  background: #eceff5;
+}
+
+.btn-supprimer {
+  width: 28px;
+  height: 28px;
+
+  background: #f3f4f6;
+}
+
+.btn-supprimer:hover {
+  background: #e5e7eb;
+}
+
+.btn-valider {
+  padding: 10px 14px;
+
+  background: #2ecc71;
+
+  color: white;
+}
+
+.btn-annuler {
+  padding: 10px 14px;
+
+  background: #e5e7eb;
+}
+
+/* ─────────────────────────
+   Formulaire
+───────────────────────── */
+
+.form-ajout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  background: white;
+
+  padding: 12px;
+
+  border-radius: 10px;
+}
+
+.input-titre {
+  resize: vertical;
+
+  min-height: 60px;
+
+  padding: 10px;
+
+  border-radius: 8px;
+
+  border: 1px solid #d1d5db;
+}
+
+.select-priorite {
+  padding: 10px;
+
+  border-radius: 8px;
+
+  border: 1px solid #d1d5db;
+}
+
+.form-boutons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ─────────────────────────
+   Animation apparition
+───────────────────────── */
+
+@keyframes carte-apparition {
+
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}

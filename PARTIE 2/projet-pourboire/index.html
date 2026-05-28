@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur de pourboire</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="carte">
+  
+  <h1>Calculateur de pourboire</h1>
+ 
+    <label>Montant de l'addition (€)</label>
+    <input type="number" id="montant" placeholder="Ex : 48.50" min="0">
+ 
+    <label>Pourboire (%)</label>
+    <div class="boutons-pourboire">
+      <button class="btn-tip" data-tip="10">10 %</button>
+      <button class="btn-tip" data-tip="15">15 %</button>
+      <button class="btn-tip" data-tip="20">20 %</button>
+    </div>
+ 
+    <label>Nombre de personnes</label>
+    <input type="number" id="personnes" placeholder="Ex : 4" min="1">
+    <p id="message-erreur" style=" display: none; color: #c0392b;  background: #fdecea;  border-radius: 6px;  padding: 0.5rem;  margin-top: 0.8rem; font-size: 0.9rem;">message-erreur</p>
+    <div class="resultats">
+      <p>Pourboire par personne : <span id="pourboire-pp">0.00 €</span></p>
+      <p>Total par personne : <span id="total-pp">0.00 €</span></p>
+    </div>    
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

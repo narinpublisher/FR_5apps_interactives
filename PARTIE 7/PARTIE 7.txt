@@ -1,0 +1,586 @@
+
+✅ 8.1 — Préparer le déploiement : structure de fichiers et liaison des ressources
+
+
+👉 La structure de fichiers recommandée
+---------------------
+calculateur-pourboire/
+├── index.html          ← Point d'entrée obligatoire (nom exact)
+├── style.css           ← Styles de l'application
+├── script.js           ← Logique JavaScript
+└── README.md           ← Description du projet (optionnel mais recommandé)
+
+gestionnaire-budget/
+├── index.html
+├── style.css
+├── script.js
+└── README.md
+
+(Même structure pour tableau-meteo/, flashcards/, kanban/)
+---------------------
+
+
+👉 Les chemins relatifs : la règle d'or
+---------------------
+<!-- Dans index.html -->
+
+<!-- MAUVAIS — chemin absolu (ne fonctionne qu'en local) -->
+<link rel="stylesheet" href="/Users/alice/projets/calculateur/style.css">
+<script src="C:\projets\calculateur\script.js"></script>
+
+<!-- MAUVAIS — chemin absolu depuis la racine (casse sur GitHub Pages) -->
+<link rel="stylesheet" href="/style.css">
+
+<!-- CORRECT — chemin relatif (fonctionne partout) -->
+<link rel="stylesheet" href="style.css">
+<script src="script.js"></script>
+
+<!-- CORRECT — sous-dossier -->
+<link rel="stylesheet" href="css/style.css">
+<script src="js/script.js"></script>
+---------------------
+
+
+👉 La checklist de déploiement
+---------------------
+CHECKLIST AVANT DÉPLOIEMENT
+─────────────────────────────────────────────────────────
+
+[  ] Le fichier principal est nommé index.html
+[  ] Tous les liens CSS utilisent des chemins relatifs
+[  ] Tous les liens JS utilisent des chemins relatifs
+[  ] Les images (si présentes) utilisent des chemins relatifs
+[  ] L'application fonctionne localement (ouvrir index.html dans le navigateur)
+[  ] La console DevTools ne montre aucune erreur rouge
+[  ] Les API externes utilisent HTTPS (pas HTTP)
+[  ] Les clés API sont placées dans des variables (jamais dans le HTML)
+[  ] Le titre de la page (<title>) est descriptif
+[  ] La balise <meta name="viewport"> est présente (pour mobile)
+---------------------
+
+
+👉 Tester localement avec un serveur
+---------------------
+# Option 1 — Si vous avez Node.js installé (recommandé)
+# Depuis le dossier de votre projet :
+npx serve .
+# L'application est alors accessible sur http://localhost:3000
+
+# Option 2 — Extension VS Code
+# Installez "Live Server" dans VS Code
+# Clic droit sur index.html → "Open with Live Server"
+# Recharge automatiquement à chaque modification du code
+
+# Option 3 — Python (si installé)
+python3 -m http.server 8080
+# Accessible sur http://localhost:8080
+---------------------
+
+
+
+✅ 8.2 — Guide GitHub Pages : configuration du dépôt, branche gh-pages, URL en ligne
+
+
+👉 Installer Git en local
+---------------------
+# Vérifier si Git est installé
+git --version
+# Exemple de retour : git version 2.43.0
+
+# Si Git n'est pas installé :
+# Windows : https://git-scm.com/download/win
+# macOS   : xcode-select --install (installe aussi Xcode Command Line Tools)
+# Linux   : sudo apt install git
+
+# Configurer votre identité (une seule fois)
+git config --global user.name "Alice Martin"
+git config --global user.email "alice.martin@email.com"
+---------------------
+
+
+👉 Créer et pousser un dépôt pour chaque projet
+---------------------
+# ÉTAPE 1 — Créer le dépôt sur GitHub
+# Allez sur github.com → bouton "+" en haut à droite → "New repository"
+# Nom du dépôt : calculateur-pourboire
+# Visibilité : Public (obligatoire pour GitHub Pages gratuit)
+# Ne cochez PAS "Initialize this repository with a README" (on le fait manuellement)
+# Cliquez "Create repository"
+
+# ÉTAPE 2 — Initialiser Git dans votre dossier projet
+cd /chemin/vers/calculateur-pourboire
+git init
+
+# ÉTAPE 3 — Ajouter tous les fichiers
+git add .
+
+# ÉTAPE 4 — Créer le premier commit
+git commit -m "Initial commit : calculateur de pourboire complet"
+
+# ÉTAPE 5 — Relier votre dossier local au dépôt GitHub
+# Remplacez alice-martin par votre nom d'utilisateur GitHub
+git remote add origin https://github.com/alice-martin/calculateur-pourboire.git
+
+# ÉTAPE 6 — Pousser le code vers GitHub
+git branch -M main
+git push -u origin main
+---------------------
+
+
+👉 Activer GitHub Pages
+---------------------
+1. Ouvrez votre dépôt sur github.com
+   Exemple : https://github.com/alice-martin/calculateur-pourboire
+
+2. Cliquez sur l'onglet "Settings" (en haut du dépôt)
+
+3. Dans le menu de gauche, cliquez "Pages"
+
+4. Sous "Branch", sélectionnez "main" dans le menu déroulant
+   Laissez le dossier sur "/ (root)"
+
+5. Cliquez "Save"
+
+6. Attendez 60 à 120 secondes (GitHub construit et déploie votre site)
+
+7. Actualisez la page Settings > Pages
+   Vous verrez un bandeau vert :
+   "Your site is live at https://alice-martin.github.io/calculateur-pourboire/"
+---------------------
+
+
+👉 Mettre à jour votre application déployée
+---------------------
+# Depuis le dossier de votre projet, après vos modifications :
+
+# 1. Voir quels fichiers ont changé
+git status
+
+# 2. Ajouter tous les fichiers modifiés
+git add .
+
+# 3. Créer un commit avec un message descriptif
+git commit -m "Amélioration : ajout de la validation des entrées vides"
+
+# 4. Pousser vers GitHub (et donc mettre à jour le site)
+git push
+
+# Le site est mis à jour en moins d'une minute.
+---------------------
+
+
+
+✅ 8.3 — Déploiement avec Netlify : glisser-déposer, bases du domaine personnalisé
+
+
+👉 Méthode 1 : le glisser-déposer (la plus rapide)
+---------------------
+DÉPLOIEMENT PAR GLISSER-DÉPOSER
+─────────────────────────
+
+1. Connectez-vous sur app.netlify.com
+
+2. Sur le tableau de bord, vous verrez une zone :"
+   "Want to deploy a new site without connecting to Git?"
+   "Drag and drop your site output folder here"
+
+3. Ouvrez l'Explorateur de fichiers (Windows) ou le Finder (macOS)
+
+4. Naviguez jusqu'au dossier de votre projet
+   Par exemple : Documents/projets/calculateur-pourboire/
+
+5. Faites glisser le DOSSIER (pas les fichiers individuels) dans la zone Netlify
+
+6. Attendez 10 à 15 secondes
+
+7. Netlify génère une URL aléatoire de type :
+   https://charming-madeleine-4a2f1b.netlify.app
+   Votre application est en ligne !
+---------------------
+
+
+👉 Méthode 2 : déploiement continu depuis GitHub (recommandé)
+---------------------
+CONNEXION NETLIFY — GITHUB (DÉPLOIEMENT CONTINU)
+──────────────────────────────
+
+1. Sur app.netlify.com, cliquez "Add new site" → "Import an existing project"
+
+2. Cliquez "Deploy with GitHub"
+   Autorisez Netlify à accéder à vos dépôts si demandé
+
+3. Cherchez et sélectionnez votre dépôt (ex: calculateur-pourboire)
+
+4. Configuration du déploiement :
+   Branch to deploy : main
+   Build command    : (laisser vide — pas de build pour du JavaScript pur)
+   Publish directory: . (point — la racine du dépôt)
+
+5. Cliquez "Deploy calculateur-pourboire"
+
+6. Netlify déploie en quelques secondes.
+   À chaque git push, le site se met à jour automatiquement.
+---------------------
+
+
+👉 Ajouter un domaine personnalisé (bases)
+---------------------
+CONNECTER UN DOMAINE PERSONNALISÉ SUR NETLIFY
+────────────────────────────
+
+1. Dans le tableau de bord de votre site Netlify,
+   cliquez "Domain settings" → "Add custom domain"
+
+2. Entrez votre domaine : alicemartin.dev (sans https://)
+
+3. Netlify vous donne les informations DNS à configurer chez votre registrar :
+   Type : A    Nom : @    Valeur : 75.2.60.5
+   Type : CNAME Nom : www  Valeur : votre-site.netlify.app
+
+4. Connectez-vous chez votre registrar (OVH, Gandi, Namecheap...)
+   et ajoutez ces enregistrements DNS
+
+5. Attendez 5 à 60 minutes (propagation DNS)
+
+6. De retour sur Netlify, cliquez "Verify DNS configuration"
+   puis "Enable HTTPS" → "Provision certificate"
+
+7. Votre site est accessible sur https://alicemartin.dev avec HTTPS actif.
+---------------------
+
+
+
+✅ 8.4 — Construire votre portfolio : descriptions de projets, README, captures d'écran
+
+👉 Rédiger un README qui parle aux recruteurs
+---------------------
+# Tableau Kanban — Gestion de tâches
+
+> Application web de gestion de tâches avec glisser-déposer et persistance des données.
+> Construite en JavaScript pur, sans framework.
+
+## Démonstration en ligne
+
+🔗 [Voir l'application](https://alice-martin.github.io/kanban/)
+
+## Fonctionnalités
+
+- Trois colonnes (À faire / En cours / Terminé)
+- Déplacement de cartes par glisser-déposer (API Drag and Drop native)
+- Ajout et suppression de cartes avec confirmation
+- Priorité visuelle par couleur (haute / moyenne / basse)
+- Persistance des données avec localStorage (survit au rechargement)
+
+## Technologies utilisées
+
+- HTML5 / CSS3 (Flexbox)
+- JavaScript ES6+ (sans dépendances)
+- API Drag and Drop
+- localStorage + JSON
+
+## Concepts JavaScript appris
+
+- Gestion d'état centralisé
+- Sérialisation / désérialisation JSON
+- Délégation d'événements
+- Génération dynamique du DOM
+
+## Lancer le projet en local
+
+```bash
+git clone https://github.com/alice-martin/kanban.git
+cd kanban
+npx serve .
+```
+---------------------
+
+
+👉 Des captures d'écran qui valorisent votre travail
+---------------------
+BONNES PRATIQUES POUR LES CAPTURES D'ÉCRAN
+───────────────────────────
+
+1. Résolution : 1280×800 pixels (ou 1440×900 pour les grands écrans)
+   Ne prenez pas une capture de plein écran avec vos autres onglets visibles
+
+2. Outil : F12 dans Chrome → icône "Toggle device toolbar" → mode desktop
+   Cela donne un fond blanc propre sans les éléments de l'OS
+
+3. Contenu : affichez l'application dans un état représentatif
+   - Calculateur : montrez un calcul en cours avec des valeurs
+   - Budget : montrez plusieurs entrées dans différentes catégories
+   - Météo : montrez une ville réelle avec des données chargées
+   - Flashcards : montrez une carte retournée avec le score
+   - Kanban : montrez les trois colonnes avec plusieurs cartes colorées
+
+4. Nommez le fichier : screenshot.png (dans le dossier du projet)
+
+5. Dans le README, ajoutez l'image avec :
+   ![Aperçu du Tableau Kanban](screenshot.png)
+---------------------
+
+
+👉 Créer une page de portfolio centralisée
+---------------------
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alice Martin — Portfolio JavaScript</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px;
+           margin: 0 auto; padding: 2rem; }
+    .projets { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+               gap: 1.5rem; }
+    .carte { border: 1px solid #e0e0e0; border-radius: 12px;
+             padding: 1.5rem; text-decoration: none; color: inherit;
+             transition: box-shadow 0.2s; }
+    .carte:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  </style>
+</head>
+<body>
+  <h1>Alice Martin</h1>
+  <p>Développeuse web junior — JavaScript, HTML, CSS</p>
+  <h2>Mes projets</h2>
+  <div class="projets">
+    <a class="carte" href="https://alice-martin.github.io/calculateur-pourboire/">
+      <h3>Calculateur de pourboire</h3>
+      <p>Gestion de formulaires, conversion de types, mise à jour du DOM en temps réel.</p>
+      <small>JavaScript · DOM · CSS</small>
+    </a>
+    <!-- Répéter pour chaque projet -->
+  </div>
+</body>
+</html>
+---------------------
+
+
+
+✅ 8.5 — Ce qu'il faut apprendre ensuite : React, Node.js, TypeScript — une feuille de route
+
+
+👉 Votre position actuelle sur la carte
+---------------------
+VOS COMPÉTENCES ACTUELLES
+─────────────────────────────────────────────────────────
+
+✔ JavaScript fondamental
+  Variables, fonctions, closures, portée, callbacks
+  Tableaux et objets : map, filter, reduce, find, splice
+  Logique conditionnelle, boucles, gestion d'erreurs
+
+✔ Manipulation du DOM
+  Sélection d'éléments, modification de contenu et de styles
+  Création et suppression dynamique d'éléments
+  Délégation d'événements
+
+✔ Communication asynchrone
+  Promises (then/catch), async/await, API Fetch
+  Parsing de JSON, gestion des erreurs HTTP
+
+✔ Gestion d'état
+  État centralisé, cycle afficher → modifier → sauvegarder
+
+✔ APIs natives du navigateur
+  Drag and Drop, localStorage, structuredClone
+
+✔ Déploiement
+  GitHub, GitHub Pages, Netlify
+---------------------
+
+
+👉 Étape suivante recommandée : React
+---------------------
+POURQUOI REACT APRÈS CE LIVRE ?
+───────────────────
+
+Votre application météo vous a appris l'asynchrone → React use les mêmes Promises
+
+Votre calculateur de pourboire vous a appris les events → React a des onClick, onChange
+
+Votre flashcard app vous a appris l'état → React a useState() qui fait exactement ça
+
+Votre Kanban vous a appris le rendu depuis l'état → React est construit sur ce principe
+
+La différence : React automatise le re-rendu efficacement.
+Vous en avez déjà compris le POURQUOI.
+---------------------
+
+
+👉 Étape parallèle : TypeScript
+---------------------
+// JavaScript (ce que vous écrivez maintenant)
+function calculerPourboire(montant, pourcentage) {
+  return montant * (pourcentage / 100);
+}
+
+// TypeScript (le même, avec des types)
+function calculerPourboire(montant: number, pourcentage: number): number {
+  return montant * (pourcentage / 100);
+}
+
+// Avantage : TypeScript signale une erreur immédiatement si vous appelez
+// calculerPourboire("dix", 15)  ← erreur détectée avant l'exécution
+---------------------
+
+
+👉 Étape suivante (6-12 mois) : Node.js et le back-end
+---------------------
+FEUILLE DE ROUTE PROGRESSIVE (estimations réalistes)
+─────────────────────────────────────────────────────────
+
+MAINTENANT (vous y êtes)
+├── JavaScript fondamental ✔
+└── 5 applications déployées ✔
+
+MOIS 1-2 : Renforcer les fondations
+├── Git avancé (branches, merge, pull requests)
+└── CSS avancé (Grid, animations, responsive design)
+
+MOIS 2-4 : Entrer dans l'écosystème pro
+├── TypeScript (bases : types, interfaces, generics)
+└── React (composants, hooks useState/useEffect, props)
+
+MOIS 4-6 : Projets portfolio avancés
+├── Une application React complète (todo list, blog, clone)
+└── Connexion à une API publique réelle
+
+MOIS 6-12 : Full-stack
+├── Node.js + Express (créer une API REST)
+├── Base de données (MongoDB ou PostgreSQL)
+└── Authentification (JWT, sessions)
+
+12 MOIS : Profil junior full-stack JavaScript
+---------------------
+
+
+
+✅ 8.6 — Ressources recommandées : livres, formations, communautés, newsletters
+
+
+👉 Pour approfondir JavaScript
+---------------------
+JAVASCRIPT — POUR APPROFONDIR
+─────────────────────────────────────────────────────────
+
+MDN Web Docs — developer.mozilla.org/fr/
+  La référence officielle, disponible en français.
+  Indispensable pour vérifier le comportement exact de chaque méthode.
+  Utilisez-la chaque fois que vous découvrez une fonction inconnue.
+
+JavaScript.info — javascript.info
+  Le meilleur tutoriel complet en ligne. Gratuit, précis, avec des exercices.
+  Couvre des sujets avancés (prototype, WeakMap, generators) après les bases.
+
+"You Don't Know JS" — Kyle Simpson (série de 6 livres)
+  Disponible gratuitement sur GitHub : github.com/getify/You-Dont-Know-JS
+  Pour ceux qui veulent comprendre JavaScript en profondeur.
+  Recommandé après 6 mois de pratique.
+
+"Eloquent JavaScript" — Marijn Haverbeke
+  eloquentjavascript.net (gratuit en ligne)
+  Une approche plus académique mais rigoureuse.
+  Excellent pour les algorithmes et la programmation fonctionnelle.
+---------------------
+
+
+👉 Pour apprendre React
+---------------------
+REACT — RESSOURCES
+─────────────────────────────────────────────────────────
+
+react.dev (site officiel)
+  La nouvelle documentation React (lancée en 2023) est excellente.
+  Elle enseigne les hooks dès le début (la bonne approche).
+  Le tutoriel "Tic-Tac-Toe" est le meilleur point d'entrée.
+
+Scrimba — scrimba.com
+  Plateforme interactive : vous modifiez le code directement dans la vidéo.
+  Le cours React gratuit de Bob Ziroll est une référence.
+
+Dyma.fr — dyma.fr
+  Plateforme française avec des cours complets en français.
+  Les formations React et Node.js sont régulièrement mises à jour.
+
+Chaîne YouTube : Fireship
+  youtube.com/@Fireship
+  Vidéos courtes (5-10 min) sur les concepts clés du web moderne.
+  Excellent pour découvrir un sujet avant de l'approfondir.
+---------------------
+
+
+👉 La communauté française
+---------------------
+COMMUNAUTÉS FRANCOPHONES
+─────────────────────────────────────────────────────────
+
+Discord : Développeurs.fr
+  Le plus grand serveur Discord francophone pour les développeurs.
+  Salons dédiés par technologie : #javascript, #react, #débutants.
+  Trouvez l'invitation via une recherche Google "Discord Développeurs FR".
+
+Discord : BeCode
+  Communauté d'apprentissage belge mais très active pour toute la francophonie.
+
+Forum : Développez.com
+  developpez.com — forum historique, très riche, réponses rapides.
+
+Subreddit : r/learnprogramming (en anglais)
+  reddit.com/r/learnprogramming
+  La communauté d'apprentissage la plus grande du monde.
+  N'ayez pas peur de poster en anglais — la communauté est très accessible.
+
+X / Twitter
+  Suivez des développeurs actifs : @ThePrimeagen, @wesbos, @kentcdodds.
+  Leur contenu est en anglais mais très accessible pour des francophones.
+---------------------
+
+
+👉 Newsletters et veille technologique
+---------------------
+NEWSLETTERS RECOMMANDÉES
+──────────────────
+
+JavaScript Weekly — javascriptweekly.com
+  La référence absolue. Hebdomadaire. Couvre tout l'écosystème JS.
+  Gratuit. En anglais mais très accessible.
+
+CSS Weekly — css-weekly.com
+  Pour rester à jour sur les évolutions CSS (Grid, Container Queries, etc.).
+
+Node Weekly — nodeweekly.com
+  Quand vous commencerez Node.js, cette newsletter sera votre compagne.
+
+bytes.dev
+  Ton détendu, humour, mais contenu de haute qualité sur React et l'écosystème.
+
+La newsletter de Josh Comeau — joshwcomeau.com
+  Peu fréquente mais articles de fond exceptionnels sur CSS et React.
+---------------------
+
+
+👉 Outils pour continuer à pratiquer
+---------------------
+PLATEFORMES DE PRATIQUE
+─────────────────
+
+Codewars — codewars.com
+  Défis algorithmiques classés par difficulté (katas).
+  Commencez par les niveaux 8 et 7 (les plus accessibles).
+  Excellent pour consolider les méthodes de tableau et la logique.
+
+Frontend Mentor — frontendmentor.io
+  Projets front-end réalistes avec maquettes Figma.
+  Beaucoup plus proche du travail réel que les exercices algorithmiques.
+  Recommandé pour construire des projets portfolio supplémentaires.
+
+The Odin Project — theodinproject.com
+  Curriculum complet et gratuit, du HTML à Node.js.
+  Très orienté pratique, avec des projets à chaque étape.
+  Excellent si vous souhaitez un curriculum structuré après ce livre.
+
+freeCodeCamp — freecodecamp.org
+  Certifications gratuites. La certification "JavaScript Algorithms
+  and Data Structures" est un bon objectif à court terme.
+---------------------

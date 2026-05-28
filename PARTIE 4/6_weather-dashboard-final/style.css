@@ -1,0 +1,265 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: background 0.5s ease;
+  color: white;
+}
+
+/* =========================
+   CONTENEUR
+========================= */
+
+.conteneur {
+  width: 100%;
+  max-width: 520px;
+
+  padding: 2rem;
+
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+/* =========================
+   BARRE RECHERCHE
+========================= */
+
+.barre-recherche {
+  display: flex;
+  gap: 0.5rem;
+
+  margin-bottom: 2rem;
+}
+
+#champ-ville {
+  flex: 1;
+
+  padding: 0.9rem 1rem;
+
+  border: none;
+  border-radius: 12px;
+
+  font-size: 1rem;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+
+  transition: transform 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+#btn-rechercher {
+  padding: 0 1rem;
+
+  background: #2E75B6;
+  color: white;
+}
+
+#btn-geoloc {
+  width: 52px;
+
+  background: white;
+}
+
+/* =========================
+   CARTE MÉTÉO
+========================= */
+
+#carte-meteo {
+  background: rgba(255, 255, 255, 0.18);
+
+  backdrop-filter: blur(10px);
+
+  border-radius: 24px;
+
+  padding: 2rem;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.entete-meteo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nom-ville {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.icone-meteo {
+  width: 80px;
+}
+
+.temperature-principale {
+  font-size: 5rem;
+  font-weight: bold;
+
+  margin-top: 1rem;
+}
+
+.unite {
+  font-size: 2rem;
+}
+
+.description {
+  font-size: 1.2rem;
+
+  margin-bottom: 2rem;
+}
+
+.details-meteo {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 1rem;
+}
+
+.detail {
+  background: rgba(255,255,255,0.12);
+
+  border-radius: 14px;
+
+  padding: 1rem;
+}
+
+.label-detail {
+  display: block;
+
+  font-size: 0.85rem;
+
+  opacity: 0.8;
+
+  margin-bottom: 0.3rem;
+}
+
+.valeur-detail {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* =========================
+   HISTORIQUE
+========================= */
+
+#historique {
+  margin-top: 2rem;
+}
+
+.titre-historique {
+  margin-bottom: 1rem;
+
+  font-weight: bold;
+}
+
+.btn-historique {
+  margin: 0.3rem;
+
+  padding: 0.6rem 1rem;
+
+  background: rgba(255,255,255,0.2);
+
+  color: white;
+}
+
+/* =========================
+   ERREUR
+========================= */
+
+#zone-erreur {
+  background: rgba(255, 255, 255, 0.18);
+
+  padding: 1.5rem;
+
+  border-radius: 18px;
+}
+
+/* =========================
+   SPINNER
+========================= */
+
+.spinner {
+  width: 50px;
+  height: 50px;
+
+  margin: 0 auto 1rem;
+
+  border: 5px solid rgba(255,255,255,0.3);
+
+  border-top-color: white;
+
+  border-radius: 50%;
+
+  animation: tourner 0.8s linear infinite;
+}
+
+@keyframes tourner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   UTILITAIRES
+========================= */
+
+.cache {
+  display: none;
+}
+
+/* =========================
+   FONDS DYNAMIQUES
+========================= */
+
+.fond-ensoleille {
+  background: linear-gradient(135deg, #f9d71c, #f48b29);
+}
+
+.fond-pluvieux {
+  background: linear-gradient(135deg, #4a6fa5, #6b8cba);
+}
+
+.fond-neige {
+  background: linear-gradient(135deg, #c8d6e5, #e8f1f8);
+}
+
+.fond-orage {
+  background: linear-gradient(135deg, #2c3e50, #4a5568);
+}
+
+.fond-nuageux {
+  background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+}
+
+.fond-nuit {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.fond-defaut {
+  background: linear-gradient(135deg, #2c3e50, #2E75B6);
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flashcards — Révision BAC</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="conteneur">
+
+    <!-- ===================================== -->
+    <!-- EN-TÊTE -->
+    <!-- ===================================== -->
+
+    <header class="entete">
+
+      <h1>Révision BAC</h1>
+
+      <div id="indicateur-progression"></div>
+
+    </header>
+
+    <!-- ===================================== -->
+    <!-- FLASHCARD -->
+    <!-- ===================================== -->
+
+    <div class="scene-carte" id="scene-carte">
+
+      <div class="carte" id="carte">
+
+        <!-- RECTO -->
+        <div class="face face-recto">
+
+          <span class="label-face">
+            Question
+          </span>
+
+          <p class="texte-carte" id="texte-question"></p>
+
+          <span class="categorie" id="categorie-carte"></span>
+
+        </div>
+
+        <!-- VERSO -->
+        <div class="face face-verso">
+
+          <span class="label-face">
+            Réponse
+          </span>
+
+          <p class="texte-carte" id="texte-reponse"></p>
+
+          <p class="explication" id="texte-explication"></p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- ACTIONS -->
+    <!-- ===================================== -->
+
+    <button id="btn-retourner">
+      Retourner la carte
+    </button>
+
+    <div id="zone-reponse" class="cache">
+
+      <button id="btn-correct" class="btn-correct">
+        Je savais ✓
+      </button>
+
+      <button id="btn-incorrect" class="btn-incorrect">
+        À revoir ✗
+      </button>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- ÉCRAN FINAL -->
+    <!-- ===================================== -->
+
+    <div id="ecran-resultats" class="cache"></div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

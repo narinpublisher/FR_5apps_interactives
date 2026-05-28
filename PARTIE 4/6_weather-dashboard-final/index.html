@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Météo en temps réel</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="fond-defaut">
+
+  <div class="conteneur">
+
+    <h1>Météo en temps réel</h1>
+
+    <!-- Barre de recherche -->
+    <div class="barre-recherche">
+
+      <input
+        type="text"
+        id="champ-ville"
+        placeholder="Entrez une ville (ex : Lyon, Marseille...)"
+        autocomplete="off"
+      />
+
+      <button id="btn-rechercher">
+        Rechercher
+      </button>
+
+      <button
+        id="btn-geoloc"
+        title="Utiliser ma position"
+      >
+        📍
+      </button>
+
+    </div>
+
+    <!-- Chargement -->
+    <div id="zone-chargement" class="cache">
+
+      <div class="spinner"></div>
+
+      <p>Récupération de la météo...</p>
+
+    </div>
+
+    <!-- Carte météo -->
+    <div id="carte-meteo" class="cache"></div>
+
+    <!-- Zone erreur -->
+    <div id="zone-erreur" class="cache">
+
+      <p id="message-erreur"></p>
+
+      <button id="btn-reessayer">
+        Réessayer
+      </button>
+
+    </div>
+
+    <!-- Historique -->
+    <div id="historique"></div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

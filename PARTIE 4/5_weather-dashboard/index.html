@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Météo en temps réel</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="conteneur">
+
+    <h1>Météo en temps réel</h1>
+
+    <!-- Barre de recherche -->
+
+    <div class="barre-recherche">
+
+      <input
+        type="text"
+        id="champ-ville"
+        placeholder="Entrez une ville..."
+      >
+
+      <button id="btn-rechercher">
+        Rechercher
+      </button>
+
+      <button
+        id="btn-geoloc"
+        title="Utiliser ma position"
+      >
+        📍
+      </button>
+
+    </div>
+
+
+
+    <!-- Carte météo -->
+
+    <div id="carte-meteo">
+
+      <div class="entete">
+
+        <div>
+          <h2>Lyon, FR</h2>
+          <p>Ciel dégagé</p>
+        </div>
+
+        <img
+          src="https://openweathermap.org/img/wn/01d@2x.png"
+          alt="Météo"
+        >
+
+      </div>
+
+      <div class="temperature">
+        21°C
+      </div>
+
+      <div class="details">
+
+        <div class="detail">
+          Humidité : 65%
+        </div>
+
+        <div class="detail">
+          Vent : 14 km/h
+        </div>
+
+        <div class="detail">
+          Ressenti : 22°C
+        </div>
+
+        <div class="detail">
+          Visibilité : 10 km
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Historique -->
+
+    <div id="historique">
+
+      <p class="titre-historique">
+        Recherches récentes :
+      </p>
+
+      <button class="btn-historique">
+        Paris
+      </button>
+
+      <button class="btn-historique">
+        Marseille
+      </button>
+
+      <button class="btn-historique">
+        Lyon
+      </button>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

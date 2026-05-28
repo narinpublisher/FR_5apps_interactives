@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Parsing JSON météo</title>
+</head>
+<body>
+
+  <h1>Transformation des données météo</h1>
+
+  <button id="chargerBtn">
+    Charger les données météo
+  </button>
+
+  <p>
+    Ouvrez la console du navigateur pour voir
+    la transformation du JSON.
+  </p>
+
+  <script>
+
+    // Simulation d'une réponse OpenWeatherMap
+    const reponseAPI = {
+      name: "Paris",
+
+      sys: {
+        country: "FR"
+      },
+
+      main: {
+        temp: 18.4,
+        feels_like: 17.1,
+        humidity: 72,
+        temp_min: 16.0,
+        temp_max: 21.2
+      },
+
+      weather: [
+        {
+          description: "ciel dégagé",
+          icon: "01d"
+        }
+      ],
+
+      wind: {
+        speed: 3.6
+      },
+
+      visibility: 10000
+    };
+
+
+
+    function extraireInfosMeteo(donnees) {
+
+      const {
+        name,
+        sys: { country },
+        main: {
+          temp,
+          feels_like,
+          humidity,
+          temp_min,
+          temp_max
+        },
+        weather: [{ description, icon }],
+        wind: { speed: vitesseVent },
+        visibility
+      } = donnees;
+
+      return {
+
+        ville: `${name}, ${country}`,
+
+        temperature: Math.round(temp),
+
+        ressenti: Math.round(feels_like),
+
+        humidite: humidity,
+
+        tempMin: Math.round(temp_min),
+
+        tempMax: Math.round(temp_max),
+
+        description:
+          description.charAt(0).toUpperCase() +
+          description.slice(1),
+
+        icone:
+          `https://openweathermap.org/img/wn/${icon}@2x.png`,
+
+        vent:
+          (vitesseVent * 3.6).toFixed(1),
+
+        visibilite:
+          (visibility / 1000).toFixed(1)
+
+      };
+
+    }
+
+
+
+    function afficherTransformation() {
+
+      console.clear();
+
+      console.log("=== Réponse JSON brute ===");
+
+      console.log(reponseAPI);
+
+      const infosTransformees =
+        extraireInfosMeteo(reponseAPI);
+
+      console.log("");
+
+      console.log("=== Objet transformé ===");
+
+      console.log(infosTransformees);
+
+    }
+
+
+
+    document
+      .getElementById("chargerBtn")
+      .addEventListener("click", afficherTransformation);
+
+  </script>
+
+</body>
+</html>
